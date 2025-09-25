@@ -10,9 +10,9 @@ spec:
     targetRevision: main
     path: apps
     helm:
-      # Prefer per-environment versions file
       valueFiles:
-        - clusters/prod/values/versions.yaml
+        - values.yaml
+        - values/envs/prod.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -20,5 +20,4 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    syncOptions: ["CreateNamespace=true"]

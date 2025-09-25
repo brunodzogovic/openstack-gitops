@@ -1,0 +1,9 @@
+project: openstack
+namespaces:
+  os: openstack
+  infra: osh-infra
+  rook: rook-ceph
+repos:
+  rook: https://charts.rook.io/release
+  osh: https://opendev.org/openstack/openstack-helm
+  osh_infra: https://opendev.org/openstack/openstack-helm-infra

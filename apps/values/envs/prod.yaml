@@ -1,0 +1,8 @@
+versions:
+  rook:
+    operator: v1.15.7
+    cluster: v1.15.7
+  openstack:
+    infra_ref: master        # later: pin to a commit SHA
+    services_ref: master     # later: pin to a commit SHA
+

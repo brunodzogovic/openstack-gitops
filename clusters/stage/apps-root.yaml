@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openstack-root-dev
+  name: openstack-root-stage
   namespace: argocd
 spec:
   project: openstack
@@ -12,7 +12,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-        - values/envs/dev.yaml
+        - values/envs/stage.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

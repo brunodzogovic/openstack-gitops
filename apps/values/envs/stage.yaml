@@ -1,0 +1,7 @@
+versions:
+  rook:
+    operator: v1.15.7
+    cluster: v1.15.7
+  openstack:
+    infra_ref: master
+    services_ref: master

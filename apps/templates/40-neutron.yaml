@@ -12,7 +12,7 @@ spec:
     namespace: {{ .Values.namespaces.os }}
   source:
     repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.openstack.services_ref }}
+    targetRevision: {{ default "master" (dig "versions" "openstack" "services_ref" .Values) }} 
     path: neutron
     helm:
       valueFiles:

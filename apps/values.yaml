@@ -7,3 +7,13 @@ repos:
   rook: https://charts.rook.io/release
   osh: https://opendev.org/openstack/openstack-helm
   osh_infra: https://opendev.org/openstack/openstack-helm-infra
+
+# apps/values.yaml  (keep your project/namespaces/repos as-is; then add)
+versions:
+  openstack:
+    infra_ref: master
+    services_ref: master
+  rook:
+    operator: v1.15.7
+    cluster: v1.15.7
+

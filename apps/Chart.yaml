@@ -1,0 +1,6 @@
+apiVersion: v2
+name: openstack-apps
+type: application
+version: 0.1.0
+description: App-of-apps for OpenStack + Rook via Argo CD
+

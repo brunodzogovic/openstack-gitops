@@ -6,13 +6,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  project: openstack
+  project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: osh-infra
+    namespace: {{ .Values.namespace.infra }}
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra
-    targetRevision: master   # RECOMMENDED: replace with a pinned commit SHA
+    repoURL: {{ .Values.repos.osh_infra }}
+    targetRevision: {{ .Values.versions.openstack.infra_ref }} # RECOMMENDED: replace with a pinned commit SHA
     path: helm-toolkit        # required dependency first
   syncPolicy:
     automated: { prune: true, selfHeal: true }
@@ -25,13 +25,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "15"
 spec:
-  project: openstack
+  project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: osh-infra
+    namespace: {{ .Values.namespace.infra }}
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra
-    targetRevision: master   # RECOMMENDED: pin to a commit SHA
+    repoURL: {{ .Values.repos.osh_infra }}
+    targetRevision: {{ .Values.versions.openstack.infra_ref }}   # RECOMMENDED: pin to a commit SHA
     path: mariadb
     helm:
       valueFiles:
@@ -47,13 +47,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "15"
 spec:
-  project: openstack
+  project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: osh-infra
+    namespace: {{ .Values.namespaces.infra }}
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra
-    targetRevision: master
+    repoURL: {{ .Values.repos.osh_infra }}
+    targetRevision: {{ .Values.versions.openstack.infra_ref }}
     path: rabbitmq
     helm:
       valueFiles:
@@ -69,13 +69,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "15"
 spec:
-  project: openstack
+  project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: osh-infra
+    namespace: {{ .Values.namespaces.infra }}
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm-infra
-    targetRevision: master
+    repoURL: {{ .Values.repos.osh_infra }}
+    targetRevision: {{ .Values.versions.openstack.infra_ref }}
     path: memcached
     helm:
       valueFiles:

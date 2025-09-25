@@ -1,0 +1,13 @@
+{
+  "enabledManagers": ["helm-values"],
+  "helm-values": {
+    "fileMatch": ["clusters/[^/]+/values/versions\\.yaml"]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["helm-values"],
+      "matchPackageNames": ["rook-ceph", "rook-ceph-cluster"],
+      "registryUrls": ["https://charts.rook.io/release"]
+    }
+  ]
+}

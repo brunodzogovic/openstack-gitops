@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: placement
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.os }}
+  source:
+    repoURL: {{ .Values.repos.osh }}
+    targetRevision: {{ .Values.versions.openstack.services_ref }}   # pin to SHA later
+    path: placement
+    helm:
+      valueFiles:
+        - ../values/globals.yaml
+        - ../values/secrets.sample.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

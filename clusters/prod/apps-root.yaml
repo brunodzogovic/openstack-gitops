@@ -9,6 +9,10 @@ spec:
     repoURL: ssh://git@github.com/brunodzogovic/openstack-gitops.git
     targetRevision: main
     path: apps
+    helm:
+      # Prefer per-environment versions file
+      valueFiles:
+        - clusters/prod/values/versions.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

@@ -1,23 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: neutron
+  name: nova
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "40"
+    argocd.argoproj.io/sync-wave: "30"
 spec:
-  project: openstack
+  project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: {{ .Values.namespaces.os }}
   source:
-    repoURL: https://opendev.org/openstack/openstack-helm
-    targetRevision: master
-    path: neutron
+    repoURL: {{ .Values.repos.osh }}
+    targetRevision: {{ .Values.versions.openstack.services_ref }}      # pin to SHA later
+    path: nova
     helm:
       valueFiles:
         - ../values/globals.yaml
-        - ../values/neutron-ovn.yaml
+        - ../values/nova-compute.yaml
         - ../values/secrets.sample.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }

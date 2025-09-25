@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-os-objects
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: openstack
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rook-ceph
+  source:
+    repoURL: https://github.com/YOURORG/openstack-gitops.git
+    targetRevision: main
+    path: manifests/rook-ceph-os
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

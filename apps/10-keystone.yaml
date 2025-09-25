@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keystone
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm
+    targetRevision: master   # RECOMMENDED: pin to commit SHA
+    path: keystone
+    helm:
+      valueFiles:
+        - ../values/globals.yaml
+        - ../values/secrets.sample.yaml   # temp: plain secrets for learning
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

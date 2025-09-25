@@ -1,0 +1,20 @@
+conf:
+  neutron:
+    DEFAULT:
+      core_plugin: ml2
+      service_plugins: ovn-router
+    ml2:
+      type_drivers: "geneve,vlan,flat"
+      tenant_network_types: "geneve"
+      mechanism_drivers: "ovn"
+    ovn:
+      ovn_nb_connection: "tcp:ovn-nb.openstack.svc.cluster.local:6641"
+      ovn_sb_connection: "tcp:ovn-sb.openstack.svc.cluster.local:6642"
+
+manifests:
+  daemonset_ovn_controller: true
+
+network:
+  interface:
+    mtu: 1450
+

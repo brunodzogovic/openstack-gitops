@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cinder
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "60"
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.os }}
+  source:
+    repoURL: {{ .Values.repos.osh }}
+    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
+    path: cinder
+    helm:
+      valueFiles:
+        - ../values/globals.yaml
+        - ../values/cinder-rbd.yaml
+        - ../values/secrets.sample.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

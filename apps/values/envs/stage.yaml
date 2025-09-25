@@ -1,7 +1,5 @@
 versions:
-  rook:
-    operator: v1.15.7
-    cluster: v1.15.7
-  openstack:
-    infra_ref: master
-    services_ref: master
+  rook_operator: v1.15.7
+  rook_cluster:  v1.15.7
+  osh_infra_ref: master
+  osh_services_ref: master

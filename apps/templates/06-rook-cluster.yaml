@@ -13,10 +13,9 @@ spec:
   source:
     repoURL: {{ .Values.repos.rook }}
     chart: rook-ceph-cluster
-    targetRevision: {{ .Values.versions.rook.cluster }}
+    targetRevision: {{ .Values.versions.rook_cluster | default "v1.15.7" }}
     helm:
       valueFiles:
         - ../../values/rook/cluster-values.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-

@@ -12,7 +12,7 @@ spec:
     namespace: {{ .Values.namespaces.os }}
   source:
     repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ default "master" (dig "versions" "openstack" "services_ref" .Values) }}   # pin to SHA later
+    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
     path: placement
     helm:
       valueFiles:

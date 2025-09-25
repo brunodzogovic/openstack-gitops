@@ -12,26 +12,7 @@ spec:
     namespace: {{ .Values.namespaces.infra }}
   source:
     repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ default "master" (dig "versions" "openstack" "infra_ref" .Values) }}# RECOMMENDED: replace with a pinned commit SHA
-    path: helm-toolkit        # required dependency first
-  syncPolicy:
-    automated: { prune: true, selfHeal: true }
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: osh-infra-services
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "15"
-spec:
-  project: {{ .Values.project }}
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: {{ .Values.namespaces.infra }}
-  source:
-    repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ default "master" (dig "versions" "openstack" "infra_ref" .Values) }}  # RECOMMENDED: pin to a commit SHA
+    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
     path: mariadb
     helm:
       valueFiles:
@@ -53,7 +34,7 @@ spec:
     namespace: {{ .Values.namespaces.infra }}
   source:
     repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ default "master" (dig "versions" "openstack" "infra_ref" .Values) }}
+    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
     path: rabbitmq
     helm:
       valueFiles:
@@ -75,7 +56,7 @@ spec:
     namespace: {{ .Values.namespaces.infra }}
   source:
     repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ default "master" (dig "versions" "openstack" "infra_ref" .Values) }}
+    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
     path: memcached
     helm:
       valueFiles:

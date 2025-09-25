@@ -9,7 +9,7 @@ spec:
   project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.namespace.infra }}
+    namespace: {{ .Values.namespaces.infra }}
   source:
     repoURL: {{ .Values.repos.osh_infra }}
     targetRevision: {{ .Values.versions.openstack.infra_ref }} # RECOMMENDED: replace with a pinned commit SHA
@@ -28,7 +28,7 @@ spec:
   project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.namespace.infra }}
+    namespace: {{ .Values.namespaceis.infra }}
   source:
     repoURL: {{ .Values.repos.osh_infra }}
     targetRevision: {{ .Values.versions.openstack.infra_ref }}   # RECOMMENDED: pin to a commit SHA

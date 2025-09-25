@@ -1,0 +1,17 @@
+labels:
+  node_selector_key: "openstack-role"
+  node_selector_value: "compute"
+
+manifests:
+  daemonset_compute: true
+
+conf:
+  nova:
+    DEFAULT:
+      debug: true
+      # example tuning:
+      reserved_host_memory_mb: 4096
+    libvirt:
+      virt_type: kvm
+      cpu_mode: host-passthrough
+

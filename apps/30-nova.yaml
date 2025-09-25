@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nova
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: openstack
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm
+    targetRevision: master      # pin to SHA later
+    path: nova
+    helm:
+      valueFiles:
+        - ../values/globals.yaml
+        - ../values/nova-compute.yaml
+        - ../values/secrets.sample.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

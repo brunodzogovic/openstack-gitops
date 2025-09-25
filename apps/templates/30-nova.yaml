@@ -12,7 +12,7 @@ spec:
     namespace: {{ .Values.namespaces.os }}
   source:
     repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.openstack.services_ref }}      # pin to SHA later
+    targetRevision: {{ default "master" (dig "versions" "openstack" "services_ref" .Values) }}     # pin to SHA later
     path: nova
     helm:
       valueFiles:

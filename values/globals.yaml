@@ -1,0 +1,15 @@
+# Align pod MTU with your CNI (Cilium with VXLAN often ~1450)
+network:
+  cluster_mtu: 1450
+
+manifests:
+  network_policy: true
+
+# OpenStack common endpoints (adjust domains later when you expose)
+endpoints:
+  cluster_domain_suffix: cluster.local
+
+pod:
+  resources:
+    enabled: false   # turn on later if you want resource requests/limits
+

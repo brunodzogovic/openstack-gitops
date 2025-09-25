@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osh-infra
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: osh-infra
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm-infra
+    targetRevision: master   # RECOMMENDED: replace with a pinned commit SHA
+    path: helm-toolkit        # required dependency first
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osh-infra-services
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: osh-infra
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm-infra
+    targetRevision: master   # RECOMMENDED: pin to a commit SHA
+    path: mariadb
+    helm:
+      valueFiles:
+        - ../../values/globals.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osh-rabbitmq
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: osh-infra
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm-infra
+    targetRevision: master
+    path: rabbitmq
+    helm:
+      valueFiles:
+        - ../../values/globals.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osh-memcached
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: osh-infra
+  source:
+    repoURL: https://opendev.org/openstack/openstack-helm-infra
+    targetRevision: master
+    path: memcached
+    helm:
+      valueFiles:
+        - ../../values/globals.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

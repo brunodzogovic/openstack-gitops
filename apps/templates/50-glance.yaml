@@ -16,9 +16,10 @@ spec:
     path: glance
     helm:
       valueFiles:
-        - ../values/globals.yaml
-        - ../values/glance-rbd.yaml
-        - ../values/secrets.sample.yaml
+        - $values/values/globals.yaml
+        - $values/values/glance-rbd.yaml
+        - $values/values/secrets.sample.yaml
+        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

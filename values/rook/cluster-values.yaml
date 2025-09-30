@@ -1,5 +1,8 @@
 cephClusterSpec:
   dataDirHostPath: /var/lib/rook
+  
+  cephVersion:
+    allowUnsupported: false
 
   mon:
     count: 3

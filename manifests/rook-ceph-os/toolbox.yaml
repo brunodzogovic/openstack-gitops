@@ -1,16 +1,28 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: rook-ceph-tools
   namespace: rook-ceph
 spec:
-  serviceAccountName: rook-ceph-default
-  containers:
-  - name: rook-ceph-tools
-    image: docker.io/rook/ceph:release-1.18 
-    command: ["/tini","-g","--","/usr/local/bin/toolbox.sh"]
-    securityContext: { privileged: true }
-    volumeMounts: [{ name: dev, mountPath: /dev }]
-  restartPolicy: Never
-  volumes: [{ name: dev, hostPath: { path: /dev } }]
-
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rook-ceph-tools
+  template:
+    metadata:
+      labels:
+        app: rook-ceph-tools
+    spec:
+      serviceAccountName: rook-ceph-system
+      containers:
+      - name: rook-ceph-tools
+        image: rook/ceph:tool-v1.15.7
+        imagePullPolicy: IfNotPresent
+        command: ["/tini","--","/usr/local/bin/toolbox.sh"]
+        volumeMounts:
+        - name: mon-endpoints
+          mountPath: /etc/ceph
+      volumes:
+      - name: mon-endpoints
+        configMap:
+          name: rook-ceph-mon-endpoints

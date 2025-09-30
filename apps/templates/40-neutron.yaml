@@ -16,9 +16,10 @@ spec:
     path: neutron
     helm:
       valueFiles:
-        - ../values/globals.yaml
-        - ../values/neutron-ovn.yaml
-        - ../values/secrets.sample.yaml
+        - $values/values/globals.yaml
+        - $values/values/neutron-ovn.yaml
+        - $values/values/secrets.sample.yaml
+        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

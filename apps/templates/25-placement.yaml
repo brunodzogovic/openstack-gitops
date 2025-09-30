@@ -16,8 +16,9 @@ spec:
     path: placement
     helm:
       valueFiles:
-        - ../values/globals.yaml
-        - ../values/secrets.sample.yaml
+        - $values/values/globals.yaml
+        - $values/values/secrets.sample.yaml
+        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

@@ -20,35 +20,19 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: rook-ceph-tools
-        image: docker.io/rook/ceph:v1.15.7
+        image: quay.io/ceph/ceph:v19
         imagePullPolicy: IfNotPresent
-        command: ["/usr/local/bin/toolbox.sh"]
-        args: []
+        command: ["/bin/bash","-lc","sleep infinity"]
         securityContext:
           privileged: true
         volumeMounts:
-        - name: dev
-          mountPath: /dev
-        - name: sysbus
-          mountPath: /sys/bus
-        - name: libmodules
-          mountPath: /lib/modules
-        - name: mon-endpoint-volume
-          mountPath: /etc/rook
+        - name: ceph-conf
+          mountPath: /etc/ceph
       volumes:
-      - name: dev
-        hostPath:
-          path: /dev
-      - name: sysbus
-        hostPath:
-          path: /sys/bus
-      - name: libmodules
-        hostPath:
-          path: /lib/modules
-      - name: mon-endpoint-volume
-        configMap:
-          name: rook-ceph-mon-endpoints
-          items:
-          - key: data
-            path: mon-endpoints
-
+      - name: ceph-conf
+        projected:
+          sources:
+          - configMap:
+              name: rook-ceph-config
+          - secret:
+              name: rook-ceph-mon

@@ -40,6 +40,9 @@ cephClusterSpec:
   network:
     provider: host
 
+  toolbox:
+    enabled: true
+
 # Create a default RBD StorageClass right away
 cephBlockPools:
   - name: replicapool

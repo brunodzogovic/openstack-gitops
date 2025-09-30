@@ -15,8 +15,14 @@ spec:
     chart: rook-ceph
     targetRevision: {{ .Values.versions.rook_operator | default "v1.15.7" }}
     helm:
-      valueFiles:
-        - ../../values/rook/operator-values.yaml
+      # Inline values to avoid cross-repo valueFiles issues
+      values: |
+        csi:
+          enableRbdDriver: true
+          enableCephfsDriver: true
+        dashboard:
+          enabled: true
+          ssl: false
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: ["CreateNamespace=true"]

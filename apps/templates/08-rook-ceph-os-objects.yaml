@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.rook }}
   source:
-    repoURL: {{ .Values.repos.osh }} # this is just a stub path for Argo to pull; we actually want local files
-    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
-    path: ../../manifests/rook-ceph-os   # path INSIDE *your* repo; Argo resolves from your app's repo because of this relative path
+    repoURL: ssh://git@github.com/brunodzogovic/openstack-gitops.git
+    targetRevision: main
+    path: manifests/rook-ceph-os
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

@@ -1,0 +1,8 @@
+csi:
+  enableRbdDriver: true
+  enableCephfsDriver: true
+
+dashboard:
+  enabled: true
+  ssl: false
+

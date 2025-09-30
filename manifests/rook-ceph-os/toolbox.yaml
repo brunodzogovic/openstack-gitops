@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rook-ceph-tools
+  namespace: rook-ceph
+spec:
+  serviceAccountName: rook-ceph-default
+  containers:
+  - name: rook-ceph-tools
+    image: quay.io/rook/ceph:v1.15.7
+    command: ["/tini","-g","--","/usr/local/bin/toolbox.sh"]
+    securityContext: { privileged: true }
+    volumeMounts: [{ name: dev, mountPath: /dev }]
+  restartPolicy: Never
+  volumes: [{ name: dev, hostPath: { path: /dev } }]
+

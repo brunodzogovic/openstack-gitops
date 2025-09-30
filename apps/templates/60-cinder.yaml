@@ -16,9 +16,10 @@ spec:
     path: cinder
     helm:
       valueFiles:
-        - ../values/globals.yaml
-        - ../values/cinder-rbd.yaml
-        - ../values/secrets.sample.yaml
+        - $values/values/globals.yaml
+        - $values/values/cinder-rbd.yaml
+        - $values/values/secrets.sample.yaml
+        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

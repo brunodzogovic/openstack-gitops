@@ -10,6 +10,7 @@ spec:
   - https://github.com/brunodzogovic/openstack-gitops
   - https://opendev.org/openstack/openstack-helm
   - https://opendev.org/openstack/openstack-helm-infra
+  - https://charts.rook.io/release
   destinations:
   - namespace: "*"
     server: https://kubernetes.default.svc

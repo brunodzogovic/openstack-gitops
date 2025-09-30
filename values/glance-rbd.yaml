@@ -1,0 +1,12 @@
+conf:
+  glance:
+    DEFAULT:
+      enabled_backends: rbd:rbd_store
+    glance_store:
+      rbd_store_pool: images
+manifests:
+  storageclass: false               # if you manage SCs yourself
+storageclass:
+  rbd:
+    name: ceph-rbd                  # same here
+

@@ -22,8 +22,8 @@ spec:
       - name: rook-ceph-tools
         image: docker.io/rook/ceph:v1.15.7
         imagePullPolicy: IfNotPresent
-        command: ["/tini"]
-        args: ["-g","--","/usr/local/bin/toolbox.sh"]
+        command: ["/usr/local/bin/toolbox.sh"]
+        args: []
         securityContext:
           privileged: true
         volumeMounts:

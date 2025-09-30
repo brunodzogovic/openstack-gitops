@@ -4,7 +4,7 @@ metadata:
   name: keystone
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: {{ .Values.project }}
   destination:

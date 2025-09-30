@@ -2,4 +2,10 @@ versions:
   rook_operator: v1.15.7
   rook_cluster:  v1.15.7
   osh_infra_ref: master
-  osh_services_ref: master
+  osh_services_ref: masteri
+
+# This is what Helm will actually use:
+cephClusterSpec:
+  cephVersion:
+    image: docker.io/ceph/ceph:v18.2.2
+    allowUnsupported: false

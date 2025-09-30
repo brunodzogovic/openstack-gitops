@@ -1,8 +1,5 @@
 cephClusterSpec:
   dataDirHostPath: /var/lib/rook
-  cephVersion:
-    image: quay.io/ceph/ceph:v18.2.2
-    allowUnsupported: false
 
   mon:
     count: 3

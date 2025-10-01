@@ -36,6 +36,12 @@ cephClusterSpec:
           operator: Exists
           effect: NoSchedule
     osd:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"     # was likely higher; 1Gi is reasonable for lab
+      # (optional) limits:
+      # limits:
+      #   memory: "2Gi"
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:

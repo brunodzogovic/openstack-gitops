@@ -42,6 +42,8 @@ spec:
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: rabbitmq
       helm:
+        manifests:
+          ingress: false
         values: |
           pod:
             replicas:

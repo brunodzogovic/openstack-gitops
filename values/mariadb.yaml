@@ -3,3 +3,6 @@ volume:
   class_name: general   # your existing StorageClass
   size: 10Gi
 
+pod:
+  replicas:
+    server: 1

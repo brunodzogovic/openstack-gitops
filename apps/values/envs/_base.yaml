@@ -3,4 +3,5 @@ versions:
   rook_cluster:  v1.15.7
   osh_infra_ref: master
   osh_services_ref: master
+  self_ref: main
 

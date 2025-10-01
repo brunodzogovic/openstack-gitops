@@ -14,13 +14,13 @@ spec:
     - repoURL: {{ .Values.repos.osh_infra }}
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: mariadb
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/mariadb.yaml   # forces rook-ceph-block
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
-  helm:
-    valueFiles:
-      - $values/values/globals.yaml
-      - $values/values/mariadb.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: ["CreateNamespace=true"]

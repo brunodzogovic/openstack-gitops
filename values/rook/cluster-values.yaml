@@ -39,7 +39,7 @@ cephClusterSpec:
   storage:
     useAllNodes: true
     useAllDevices: false
-    deviceFilter: "^sd[b-z]$|^vd[b-z]$|^nvme[0-9]n[0-9]$"        # keep empty unless you want to match /dev names by regex
+    deviceFilter: '^(sd[b-z]|vd[b-z]|nvme\d+n\d+)$'   # keep empty unless you want to match /dev names by regex
     # You can explicitly list devices per node instead of deviceFilter, e.g.:
     # nodes:
     # - name: worker-1

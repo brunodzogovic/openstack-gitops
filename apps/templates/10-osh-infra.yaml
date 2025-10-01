@@ -17,7 +17,6 @@ spec:
     helm:
       valueFiles:
         - $values/values/globals.yaml
-        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: ["CreateNamespace=true"]
@@ -41,7 +40,6 @@ spec:
     helm:
       valueFiles:
         - $values/values/globals.yaml
-        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: ["CreateNamespace=true"]
@@ -65,7 +63,6 @@ spec:
     helm:
       valueFiles:
         - $values/values/globals.yaml
-        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: ["CreateNamespace=true"]

@@ -1,11 +1,1 @@
-versions:
-  rook_operator: v1.15.7
-  rook_cluster:  v1.15.7
-  osh_infra_ref: master
-  osh_services_ref: master
 
-# This is what Helm will actually use:
-cephClusterSpec:
-  cephVersion:
-    image: quay.io/ceph/ceph:v18.2.7
-    allowUnsupported: false

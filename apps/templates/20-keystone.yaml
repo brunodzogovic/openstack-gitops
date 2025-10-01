@@ -18,7 +18,6 @@ spec:
       valueFiles:
         - $values/values/globals.yaml
         - $values/values/secrets.sample.yaml
-        - $values/apps/values/envs/prod.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

@@ -13,3 +13,7 @@ pod:
   resources:
     enabled: false   # turn on later if you want resource requests/limits
 
+volumes:
+  enabled: true
+  class_name: rook-ceph-block
+  size: 10Gi

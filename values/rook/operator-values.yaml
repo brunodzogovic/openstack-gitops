@@ -1,7 +1,7 @@
 enableDiscoveryDaemon: true
 csi:
   enableRbdDriver: true
-  enableCephfsDriver: true
+  enableCephfsDriver: false
   provisionerReplicas: 1
 
 dashboard:

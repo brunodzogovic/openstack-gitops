@@ -66,14 +66,18 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.infra }}
-  source:
-    repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
-    path: memcached
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
+  sources:
+    - repoURL: {{ .Values.repos.osh_infra }}
+      targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+      path: memcached
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/memcached.yaml
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: ["CreateNamespace=true"]
-
+    syncOptions:
+      - CreateNamespace=true 

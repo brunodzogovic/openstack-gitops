@@ -18,6 +18,7 @@ spec:
       helm:
         valueFiles:
           - $values/values/rook/operator-values.yaml
+          - $values/apps/values.yaml
     # Source 2: your repo with values
     - repoURL: ssh://git@github.com/brunodzogovic/openstack-gitops.git
       targetRevision: main

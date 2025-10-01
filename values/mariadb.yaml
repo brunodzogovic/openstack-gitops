@@ -1,5 +1,5 @@
 volume:
   enabled: true
-  class_name: rook-ceph-block   # your existing StorageClass
+  class_name: general   # your existing StorageClass
   size: 10Gi
 

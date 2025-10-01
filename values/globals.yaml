@@ -15,5 +15,5 @@ pod:
 
 volumes:
   enabled: true
-  class_name: rook-ceph-block
+  class_name: general
   size: 10Gi

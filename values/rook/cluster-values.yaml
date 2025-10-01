@@ -87,7 +87,7 @@ cephBlockPools:
         compression_mode: "none"
     storageClass:
       enabled: true
-      name: rook-ceph-block
+      name: general
       isDefault: true
       reclaimPolicy: Delete
       allowVolumeExpansion: true

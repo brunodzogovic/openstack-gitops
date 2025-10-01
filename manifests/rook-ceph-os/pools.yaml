@@ -5,7 +5,9 @@ metadata:
   namespace: rook-ceph
 spec:
   failureDomain: host
-  replicated: { size: 1 }   # use 2 if only 2 OSD hosts; 1 for lab only
+  replicated:
+    size: 3
+    minsize: 2   # use 2 if only 2 OSD hosts; 1 for lab only
 ---
 apiVersion: ceph.rook.io/v1
 kind: CephBlockPool
@@ -14,5 +16,7 @@ metadata:
   namespace: rook-ceph
 spec:
   failureDomain: host
-  replicated: { size: 1 }
+  replicated: 
+    size: 3
+    minsize: 2
 

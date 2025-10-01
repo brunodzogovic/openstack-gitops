@@ -41,17 +41,7 @@ spec:
     - repoURL: {{ .Values.repos.osh_infra }}      # opendev.org/openstack/openstack-helm
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: rabbitmq
-      helm:
-        manifests:
-          ingress: false
-        values: |
-          pod:
-            replicas:
-              server: 1
-          volume:
-            enabled: true
-            class_name: general
-            size: 10Gi
+      helm: 
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/rabbitmq.yaml          # <-- new file

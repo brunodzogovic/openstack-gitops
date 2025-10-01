@@ -1,9 +1,7 @@
 #TOOLBOX lives at the TOP LEVEL of the chart values
 cephImage:
   repository: quay.io/ceph/ceph
-  # pick one:
-  tag: v18.2.7            # latest Reef patch (recommended)
-  # tag: v18.2.2          # if you must stick to 18.2.2
+  tag: v18.2.7
 
 toolbox:
   enabled: true
@@ -39,9 +37,9 @@ cephClusterSpec:
               values: ["enabled"]
 
   storage:
-    useAllNodes: false
+    useAllNodes: true
     useAllDevices: false
-    deviceFilter: ""        # keep empty unless you want to match /dev names by regex
+    deviceFilter: "^sd[b-z]$|^vd[b-z]$|^nvme[0-9]n[0-9]$"        # keep empty unless you want to match /dev names by regex
     # You can explicitly list devices per node instead of deviceFilter, e.g.:
     # nodes:
     # - name: worker-1

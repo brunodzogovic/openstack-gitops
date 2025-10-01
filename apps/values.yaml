@@ -8,7 +8,7 @@ namespaces:
 repos:
   rook: https://charts.rook.io/release
   osh: https://opendev.org/openstack/openstack-helm
-  osh_infra: https://opendev.org/openstack/openstack-helm-infra
+  osh_infra: https://opendev.org/openstack/openstack-helm
 
 versions:
   rook_operator: v1.15.7

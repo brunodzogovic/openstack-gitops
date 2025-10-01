@@ -7,3 +7,6 @@ volume:
   enabled: true
   class_name: general   # matches your Rook SC
   size: 10Gi
+
+manifests:
+  ingress: false

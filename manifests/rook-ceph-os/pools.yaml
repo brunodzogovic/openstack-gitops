@@ -23,5 +23,16 @@ spec:
     requireSafeReplicaSize: true
   parameters:
     compression_mode: "none"
-
-
+---
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  failureDomain: host
+  replicated:
+    size: 3
+    requireSafeReplicaSize: true
+  parameters:
+    compression_mode: "none"

@@ -42,6 +42,14 @@ spec:
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: rabbitmq
       helm:
+        values: |
+          pod:
+            replicas:
+              server: 1
+          volume:
+            enabled: true
+            class_name: general
+            size: 10Gi
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/rabbitmq.yaml          # <-- new file

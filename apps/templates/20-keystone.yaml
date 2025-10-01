@@ -18,7 +18,7 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/keystone.yaml
-          # (we’ll add secrets below if needed)
+          - $values/values/secrets.sops.yaml
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values

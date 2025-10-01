@@ -15,6 +15,13 @@ spec:
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: mariadb
       helm:
+        parameters:
+          - name: volume.enabled
+            value: "true"
+          - name: volume.class_name
+            value: rook-ceph-block
+          - name: volume.size
+            value: 10Gi
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/mariadb.yaml   # forces rook-ceph-block

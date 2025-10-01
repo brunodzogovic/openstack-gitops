@@ -17,7 +17,8 @@ spec:
       helm:
         valueFiles:
           - $values/values/globals.yaml
-          - $values/values/mariadb.yaml   # forces rook-ceph-block
+          - $values/values/mariadb.yaml
+          - $values/values/secrets.sops.yaml
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
@@ -44,8 +45,10 @@ spec:
       helm: 
         valueFiles:
           - $values/values/globals.yaml
-          - $values/values/rabbitmq.yaml          # <-- new file
-    - repoURL: {{ .Values.repos.self }}           # your GitOps repo
+          - $values/values/rabbitmq.yaml
+          - $values/values/rabbitmq.secrets.sops.yaml
+          - $values/values/secrets.sops.yaml          
+    - repoURL: {{ .Values.repos.self }}           
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
   syncPolicy:

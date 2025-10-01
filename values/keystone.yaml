@@ -1,0 +1,19 @@
+pod:
+  replicas:
+    api: 1
+
+# keep charts from creating Ingress objects (we'll use Gateway later)
+manifests:
+  ingress_api: false
+  ingress_admin: false
+
+# optional: tiny resources for a small cluster; bump later if needed
+resources:
+  enabled: true
+  pod:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+

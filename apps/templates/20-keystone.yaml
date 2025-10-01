@@ -9,15 +9,20 @@ spec:
   project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.namespaces.os }}
-  source:
-    repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
-    path: keystone
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
-        - $values/values/secrets.sample.yaml
+    namespace: {{ .Values.namespaces.openstack }}
+  sources:
+    - repoURL: {{ .Values.repos.osh }}       # opendev.org/openstack/openstack-helm
+      targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
+      path: keystone
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/keystone.yaml
+          # (we’ll add secrets below if needed)
+    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-
+    syncOptions:
+      - CreateNamespace=true

@@ -1,12 +1,19 @@
-# values/rabbitmq.yaml
 pod:
   replicas:
     server: 1
 
 volume:
   enabled: true
-  class_name: general   # matches your Rook SC
+  class_name: general
   size: 10Gi
 
+# disable the RabbitMQ manager ingress that Argo's waiting on
 manifests:
-  ingress: false
+  ingress_management: false
+  monitoring:
+    service_ingress_management: false
+
+network:
+  management:
+    ingress:
+      public: false

@@ -1,3 +1,4 @@
+enableDiscoveryDaemon: true
 csi:
   enableRbdDriver: true
   enableCephfsDriver: true

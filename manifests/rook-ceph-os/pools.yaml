@@ -7,7 +7,9 @@ spec:
   failureDomain: host
   replicated:
     size: 3
-    minsize: 2   # use 2 if only 2 OSD hosts; 1 for lab only
+    requireSafeReplicaSize: true
+  parameters:
+    compression_mode: "none"
 ---
 apiVersion: ceph.rook.io/v1
 kind: CephBlockPool
@@ -16,7 +18,10 @@ metadata:
   namespace: rook-ceph
 spec:
   failureDomain: host
-  replicated: 
+  replicated:
     size: 3
-    minsize: 2
+    requireSafeReplicaSize: true
+  parameters:
+    compression_mode: "none"
+
 

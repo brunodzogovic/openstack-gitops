@@ -1,0 +1,9 @@
+# values/rabbitmq.yaml
+pod:
+  replicas:
+    server: 1
+
+volume:
+  enabled: true
+  class_name: general   # matches your Rook SC
+  size: 10Gi

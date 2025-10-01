@@ -37,16 +37,22 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.infra }}
-  source:
-    repoURL: {{ .Values.repos.osh_infra }}
-    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
-    path: rabbitmq
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
+  sources:
+    - repoURL: {{ .Values.repos.osh_infra }}      # opendev.org/openstack/openstack-helm
+      targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+      path: rabbitmq
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/rabbitmq.yaml          # <-- new file
+    - repoURL: {{ .Values.repos.self }}           # your GitOps repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: ["CreateNamespace=true"]
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true    # keep for the first sync of this SS, then you can remove it later
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application

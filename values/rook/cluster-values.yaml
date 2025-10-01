@@ -77,7 +77,7 @@ cephBlockPools:
     spec:
       failureDomain: host
       replicated:
-        size: 3             # <-- change to 2 if you only have 2 OSD nodes
+        size: 2             # <-- change to 2 if you only have 2 OSD nodes
     storageClass:
       enabled: true
       name: rook-ceph-block

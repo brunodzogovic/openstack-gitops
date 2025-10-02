@@ -2,7 +2,19 @@ pod:
   replicas:
     api: 1
 
-# keep charts from creating Ingress objects (we'll use Gateway later)
+# keep charts from creating Ingress objects (we'll use Cilium GatewayAPI later)
+
+helm3_hook: false
+
+images:
+  tags:
+    # utility images used by setup jobs (these default to Noble on master)
+    ks_user:       docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
+    ks_endpoints:  docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
+    dep_check:     quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_jammy
+    # (optional, but fine to pin too)
+    keystone:      docker.io/openstackhelm/keystone:2024.2-ubuntu_jammy
+
 manifests:
   ingress_api: false
   ingress_admin: false

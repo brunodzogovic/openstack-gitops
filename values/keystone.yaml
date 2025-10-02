@@ -2,6 +2,21 @@ pod:
   replicas:
     api: 1
 
+# Make dependencies explicit so db-init doesn't wait on itself
+dependencies:
+  db_init:
+    jobs: []    # <— important: no self-dependency
+    services:
+      - service: mariadb
+        namespace: osh-infra
+
+  db_sync:
+    jobs:
+      - keystone-db-init
+    services:
+      - service: mariadb
+        namespace: osh-infra
+
 endpoints:
   oslo_db:
     hosts: { default: mariadb }

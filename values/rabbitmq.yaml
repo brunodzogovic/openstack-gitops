@@ -18,3 +18,8 @@ network:
   management:
     ingress:
       public: false
+
+images:
+  tags:
+    rabbitmq_init: docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
+    openstackhelm/heat:2024.2-ubuntu_jammy: docker.io/openstackhelm/heat:2024.2-ubuntu_jammy

@@ -21,15 +21,33 @@ endpoints:
   oslo_db:
     hosts: { default: mariadb }
     namespace: osh-infra
+    scheme: mysql+pymysql
     port: { mysql: { default: 3306 } }
+    auth:
+      admin:    { username: root }
+      keystone: { username: keystone }
+
   oslo_messaging:
     hosts: { default: osh-rabbitmq-rabbitmq }
     namespace: osh-infra
     port: { amqp: { default: 5672 } }
+    auth:
+      admin:    { username: rabbitmq }
+      keystone: { username: keystone }
+
   oslo_cache:
     hosts: { default: osh-memcached-memcached }
     namespace: osh-infra
     port: { memcache: { default: 11211 } }
+
+  identity:
+    auth:
+      admin:
+        username: admin
+        project_name: admin
+        user_domain_name: Default
+        project_domain_name: Default
+
 
 # keep charts from creating Ingress objects (we'll use Cilium GatewayAPI later)
 

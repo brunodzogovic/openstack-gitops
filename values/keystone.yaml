@@ -8,6 +8,8 @@ manifests:
   ingress_admin: false
   job_fernet_setup: true
   job_credential_setup: true
+  job_db_sync: true
+  job_bootstrap: true
 
 # optional: tiny resources for a small cluster; bump later if needed
 resources:

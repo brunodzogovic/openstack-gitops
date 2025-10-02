@@ -69,6 +69,8 @@ manifests:
   job_credential_setup: true
   job_db_sync: true
   job_bootstrap: true
+  cron_fernet_rotate: true
+  cron_credential_rotate: true
 
 # optional: tiny resources for a small cluster; bump later if needed
 resources:

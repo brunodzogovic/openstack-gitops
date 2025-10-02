@@ -9,7 +9,7 @@ volume:
 
 # disable the RabbitMQ manager ingress that Argo's waiting on
 manifests:
-  helm_tests: false
+  helm_tests: true
   ingress_management: false
   monitoring:
     service_ingress_management: false

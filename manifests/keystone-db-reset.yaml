@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
-    run-id: "rerun-20251003-01"
+    run-id: "rerun-20251003-02"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 2

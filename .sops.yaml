@@ -1,3 +1,3 @@
 creation_rules:
-  - path_regex: ^values/.*secrets.*\.ya?ml$
+  - path_regex: ^values/secrets/.*secrets.*\.ya?ml$
     age: ["age1ys90srxtsfewrncgp0gljdfxvm4wgnptyewev2txm4ga3m8s750sg3r5ew"]

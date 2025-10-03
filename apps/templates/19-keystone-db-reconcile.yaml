@@ -9,7 +9,7 @@ spec:
   project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: {{ .Values.namespaces.os }}
   source:
     repoURL: {{ .Values.repos.self | default "ssh://git@github.com/brunodzogovic/openstack-gitops.git" }}
     targetRevision: {{ .Values.versions.self | default "main" }}

@@ -1,0 +1,41 @@
+{
+  "spec": {
+    "template": {
+      "spec": {
+        "volumes": [
+          { "name": "gitops-tools", "emptyDir": {} }
+        ],
+        "initContainers": [
+          {
+            "name": "install-helm-secrets-and-sops",
+            "image": "alpine:3.20",
+            "command": ["/bin/sh","-lc"],
+            "args": [
+              "set -ex; apk add --no-cache bash wget tar coreutils; mkdir -p /gitops-tools/helm-plugins; ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/'); wget -qO /gitops-tools/sops https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.linux.$ARCH; chmod +x /gitops-tools/sops; wget -qO- https://github.com/jkroepke/helm-secrets/releases/download/v4.6.10/helm-secrets.tar.gz | tar -C /gitops-tools/helm-plugins -xzf -; wget -qO- https://github.com/FiloSottile/age/releases/download/v1.2.1/age-v1.2.1-linux-amd64.tar.gz | tar -xzf - --strip-components=1 -C /gitops-tools age/age; chmod +x /gitops-tools/age;"
+            ],
+            "volumeMounts": [
+              { "name": "gitops-tools", "mountPath": "/gitops-tools" }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "name": "argocd-repo-server",
+            "env": [
+              { "name": "HELM_PLUGINS", "value": "/gitops-tools/helm-plugins" },
+              { "name": "HELM_SECRETS_BACKEND", "value": "sops" },
+              { "name": "HELM_SECRETS_SOPS_PATH", "value": "/gitops-tools/sops" },
+              { "name": "HELM_SECRETS_AGE_PATH", "value": "/gitops-tools/age" },
+              { "name": "HELM_SECRETS_VALUES_ALLOW_ABSOLUTE_PATH", "value": "true" },
+              { "name": "HELM_SECRETS_WRAPPER_ENABLED", "value": "true" },
+              { "name": "SOPS_AGE_KEY_FILE", "value": "/sops/age.agekey" }
+            ],
+            "volumeMounts": [
+              { "name": "gitops-tools", "mountPath": "/gitops-tools" }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

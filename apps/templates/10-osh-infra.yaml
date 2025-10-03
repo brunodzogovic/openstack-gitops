@@ -32,7 +32,7 @@ metadata:
   name: osh-rabbitmq
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   project: {{ .Values.project }}
   destination:
@@ -63,7 +63,7 @@ metadata:
   name: osh-memcached
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   project: {{ .Values.project }}
   destination:

@@ -72,6 +72,15 @@ manifests:
   cron_fernet_rotate: true
   cron_credential_rotate: true
 
+conf:
+  keystone:
+    token:
+      provider: fernet
+    fernet_tokens:
+      key_repository: /etc/keystone/fernet-keys
+    credential:
+      key_repository: /etc/keystone/credential-keys
+
 # optional: tiny resources for a small cluster; bump later if needed
 resources:
   enabled: true

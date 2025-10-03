@@ -4,15 +4,22 @@ metadata:
   name: keystone-db-reset
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "19"   # runs before your "20-keystone.yaml"
+    argocd.argoproj.io/sync-wave: "19"
 spec:
+  project: {{ .Values.project }}               # e.g. "openstack"
   source:
     repoURL: {{ .Values.repos.self | default "ssh://git@github.com/brunodzogovic/openstack-gitops.git" }}
+    targetRevision: {{ .Values.versions.self | default "main" }}
     path: manifests
     directory:
       recurse: false
       include: keystone-db-reset.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.os }}     # e.g. "openstack"
   syncPolicy:
-    automated: { prune: true, selfHeal: true }
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
     - ApplyOutOfSyncOnly=true

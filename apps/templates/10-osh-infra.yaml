@@ -18,7 +18,7 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/mariadb.yaml
-          - $values/values/secrets.sops.yaml
+          - $values/values/secrets/secrets.sops.yaml
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
@@ -46,8 +46,8 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/rabbitmq.yaml
-          - $values/values/rabbitmq.secrets.sops.yaml
-          - $values/values/secrets.sops.yaml          
+          - $values/values/secrets/rabbitmq.secrets.sops.yaml
+          - $values/values/secrets/secrets.sops.yaml          
     - repoURL: {{ .Values.repos.self }}           
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values

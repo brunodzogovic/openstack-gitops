@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keystone-db-reset
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "19"   # runs before your "20-keystone.yaml"
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.os }}
+  source:
+    repoURL: {{ .Values.repos.self | default "ssh://git@github.com/brunodzogovic/openstack-gitops.git" }}
+    targetRevision: {{ .Values.versions.self | default "main" }}
+    path: manifests
+    directory:
+      recurse: false
+      include: keystone-db-reset.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

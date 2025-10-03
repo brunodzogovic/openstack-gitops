@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-db-reset
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: reset
+          image: mysql:8.0
+          env:
+            # These two secrets are created by the keystone chart from your values.
+            - name: ADMIN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-db-admin
+                  key: DB_CONNECTION
+            - name: USER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: keystone-db-user
+                  key: DB_CONNECTION
+          command: ["/bin/sh","-lc"]
+          args:
+            - |
+              set -euo pipefail
+              # urls look like: mysql+pymysql://user:pass@host:3306/db
+              host=$(printf "%s\n" "$ADMIN_URL" | sed -E 's#.*@([^:/]+).*#\1#')
+              admin_pass=$(printf "%s\n" "$ADMIN_URL" | sed -E 's#^[^:]+://[^:]+:([^@]+)@.*#\1#')
+              user_pass=$(printf "%s\n" "$USER_URL"  | sed -E 's#^[^:]+://[^:]+:([^@]+)@.*#\1#')
+
+              # Ensure DB & user exist, then forcibly align the password to the desired value
+              mysql -h "$host" -uroot -p"$admin_pass" -e "CREATE DATABASE IF NOT EXISTS keystone;"
+              mysql -h "$host" -uroot -p"$admin_pass" -e \
+                "CREATE USER IF NOT EXISTS 'keystone'@'%' IDENTIFIED BY '${user_pass}'; \
+                 GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%'; \
+                 ALTER USER 'keystone'@'%' IDENTIFIED BY '${user_pass}'; \
+                 FLUSH PRIVILEGES;"
+

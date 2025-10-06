@@ -36,7 +36,7 @@ spec:
             CREATE USER IF NOT EXISTS 'keystone'@'%' IDENTIFIED BY '${user_pass}';
             GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%';
             FLUSH PRIVILEGES;
-SQL
+            SQL
 
             echo "Smoke-test the new password as keystone…"
             mysql -h "$host" -ukeystone -p"$user_pass" -e "SELECT 1"

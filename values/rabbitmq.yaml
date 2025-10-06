@@ -31,4 +31,4 @@ endpoints:
     host_fqdn_override:
       # hard-set the fully-qualified host the jobs should use for mgmt HTTP API
       # (adjust name if your svc is different; often it's osh-rabbitmq-mgr)
-      default: osh-rabbitmq-mgr.osh-infra.svc.cluster.local
+      default: rabbitmq.osh-infra.svc.cluster.local

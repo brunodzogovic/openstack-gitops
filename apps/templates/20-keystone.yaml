@@ -64,6 +64,7 @@ spec:
                   value: BeforeHookCreation
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref:  values
       path: manifests
       directory: 
         include: keystone-db-reconcile.yaml

@@ -23,3 +23,12 @@ images:
   tags:
     rabbitmq_init: docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
     openstackhelm/heat:2024.2-ubuntu_jammy: docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
+
+endpoints:
+  oslo_messaging:
+    # rabbit lives in osh-infra; this matters for FQDN generation/templating
+    namespace: osh-infra
+    host_fqdn_override:
+      # hard-set the fully-qualified host the jobs should use for mgmt HTTP API
+      # (adjust name if your svc is different; often it's osh-rabbitmq-mgr)
+      default: osh-rabbitmq-mgr.osh-infra.svc.cluster.local

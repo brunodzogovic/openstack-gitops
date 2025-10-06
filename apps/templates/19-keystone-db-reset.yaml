@@ -1,23 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keystone-db-reset
+  name: keystone-db-password-fix
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "19"
 spec:
-  project: {{ .Values.project }}               # e.g. "openstack"
+  project: {{ .Values.project }}
   source:
     repoURL: {{ .Values.repos.self | default "ssh://git@github.com/brunodzogovic/openstack-gitops.git" }}
     targetRevision: {{ .Values.versions.self | default "main" }}
     path: manifests
     directory:
       recurse: false
-      include: keystone-db-reset.yaml
+      include: keystone-db-password-fix.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.namespaces.os }}     # e.g. "openstack"
+    namespace: {{ .Values.namespaces.os }}
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - ApplyOutOfSyncOnly=true

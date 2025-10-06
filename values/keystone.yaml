@@ -19,27 +19,38 @@ dependencies:
 
 endpoints:
   oslo_db:
-    hosts: { default: mariadb }
+    hosts:  
+      default: mariadb
     namespace: osh-infra
     scheme: mysql+pymysql
-    port: { mysql: { default: 3306 } }
+    port: 
+      mysql: 
+        default: 3306
     auth:
-      admin:    { username: root }
-      keystone: { username: keystone }
-
+      admin:
+        username: root
+      keystone: 
+        username: keystone
   oslo_messaging:
-    hosts: { default: osh-rabbitmq-rabbitmq }
+    hosts: 
+      default: rabbitmq
     namespace: osh-infra
-    port: { amqp: { default: 5672 } }
+    port:
+      amqp:
+        default: 5672
     auth:
-      admin:    { username: rabbitmq }
-      keystone: { username: keystone }
+      admin:
+        username: rabbitmq
+      keystone: 
+        username: keystone
 
   oslo_cache:
-    hosts: { default: osh-memcached-memcached }
+    hosts:
+      default: osh-memcached-memcached
     namespace: osh-infra
-    port: { memcache: { default: 11211 } }
-
+    port:
+      memcache:
+        default: 11211
   identity:
     auth:
       admin:

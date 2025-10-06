@@ -2,6 +2,8 @@ pod:
   replicas:
     api: 1
 
+helm3_hook: true
+
 # Make dependencies explicit so db-init doesn't wait on itself
 dependencies:
   db_init:
@@ -59,11 +61,6 @@ endpoints:
         project_name: admin
         user_domain_name: Default
         project_domain_name: Default
-
-
-# keep charts from creating Ingress objects (we'll use Cilium GatewayAPI later)
-
-helm3_hook: true
 
 images:
   tags:

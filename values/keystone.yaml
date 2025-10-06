@@ -5,7 +5,8 @@ pod:
 # Make dependencies explicit so db-init doesn't wait on itself
 dependencies:
   db_init:
-    jobs: []    # <— important: no self-dependency
+    jobs:
+      - keystone-db-password-fix
     services:
       - service: mariadb
         namespace: osh-infra

@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-db-reconcile
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    # bump this to force re-run whenever you need
+    run-id: "rerun-20251006-01"
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: fix
+        image: mysql:8.0
+        env:
+        - name: ADMIN_URL
+          valueFrom: { secretKeyRef: { name: keystone-db-admin, key: DB_CONNECTION } }
+        - name: USER_URL
+          valueFrom:  { secretKeyRef: { name: keystone-db-user,  key: DB_CONNECTION } }
+        command: ["/bin/sh","-lc"]
+        args:
+          - |
+            set -euo pipefail
+            host=$(echo "$ADMIN_URL" | sed -E 's#.*@([^:/]+).*#\1#')
+            admin_pass=$(echo "$ADMIN_URL" | sed -E 's#^[^:]+://[^:]+:([^@]+)@.*#\1#')
+            user_pass=$(echo  "$USER_URL" | sed -E 's#^[^:]+://[^:]+:([^@]+)@.*#\1#')
+
+            echo "ALTER USER keystone@% to the value coming from keystone-db-user secret…"
+            mysql -h "$host" -uroot -p"$admin_pass" <<'SQL'
+            ALTER USER IF EXISTS 'keystone'@'%' IDENTIFIED BY '${user_pass}';
+            CREATE USER IF NOT EXISTS 'keystone'@'%' IDENTIFIED BY '${user_pass}';
+            GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%';
+            FLUSH PRIVILEGES;
+SQL
+
+            echo "Smoke-test the new password as keystone…"
+            mysql -h "$host" -ukeystone -p"$user_pass" -e "SELECT 1"
+            echo "Password OK."

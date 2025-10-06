@@ -40,7 +40,7 @@ endpoints:
         default: 5672
     auth:
       admin:
-        username: rabbitmq
+        username: admin
       keystone: 
         username: keystone
 
@@ -62,7 +62,7 @@ endpoints:
 
 # keep charts from creating Ingress objects (we'll use Cilium GatewayAPI later)
 
-helm3_hook: false
+helm3_hook: true
 
 images:
   tags:

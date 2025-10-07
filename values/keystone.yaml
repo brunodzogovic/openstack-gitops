@@ -35,12 +35,16 @@ endpoints:
       keystone: 
         username: keystone
   oslo_messaging:
+    host_fqdn_overrides:
+      default: rabbitmq.osh-infra.svc.cluster.local
     hosts: 
       default: rabbitmq
     namespace: osh-infra
     scheme: 
       default: rabbit
       admin: http
+      management: http
+      http: http
     port:
       amqp:
         default: 5672

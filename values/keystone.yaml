@@ -43,7 +43,7 @@ endpoints:
         default: 5672
     auth:
       admin:
-        username: keystone
+        username: rabbitmq
       keystone: 
         username: keystone
 

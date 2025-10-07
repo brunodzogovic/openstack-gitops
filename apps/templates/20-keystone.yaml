@@ -78,6 +78,7 @@ spec:
         recurse: true
         include: |
           keystone-db-reconcile.yaml
+          keystone-credential-secret-rbac.yaml
           keystone-fernet-secret-rbac.yaml
           keystone-fernet-cleanup.yaml
   syncPolicy:

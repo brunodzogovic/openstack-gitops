@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-fernet-cleanup
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "-8"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: default
+      containers:
+      - name: cleanup
+        image: bitnami/kubectl:latest
+        command: ["/bin/sh","-lc"]
+        args:
+        - |
+          set -euo pipefail
+          if kubectl -n openstack get secret keystone-fernet-keys >/dev/null 2>&1; then
+            if kubectl -n openstack get secret keystone-fernet-keys -o json | jq -e '.data | length == 0' >/dev/null 2>&1; then
+              echo "Deleting empty keystone-fernet-keys secret…"
+              kubectl -n openstack delete secret keystone-fernet-keys
+            else
+              echo "Secret has data; leaving it alone."
+            fi
+          else
+            echo "Secret not found; nothing to do."
+          fi

@@ -62,12 +62,23 @@ spec:
                 - op: add
                   path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
                   value: BeforeHookCreation
+            - target:
+                kind: CronJob
+                name: keystone-fernet-rotate
+              patch: |
+                - op: add
+                  path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+                  value: "10"
+
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
       path: manifests
       directory: 
-        include: keystone-db-reconcile.yaml
+        include: |
+          keystone-db-reconcile.yaml
+          keystone-fernet-secret-rbac.yaml
+          keystone-fernet-cleanup.yaml
   syncPolicy:
     automated:
       prune: true

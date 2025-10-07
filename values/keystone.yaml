@@ -38,9 +38,17 @@ endpoints:
     hosts: 
       default: rabbitmq
     namespace: osh-infra
+    scheme: 
+      default: rabbit
+      admin: http
     port:
       amqp:
         default: 5672
+      http:
+        default: 15672
+    path:
+      default: /keystone
+      admin: ""
     auth:
       admin:
         username: rabbitmq

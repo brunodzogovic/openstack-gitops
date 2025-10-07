@@ -80,6 +80,7 @@ images:
     keystone:      docker.io/openstackhelm/keystone:2024.2-ubuntu_jammy
 
 manifests:
+  secret_rabbitmq: true
   ingress_api: false
   ingress_admin: false
   job_fernet_setup: true

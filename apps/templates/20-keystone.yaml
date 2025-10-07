@@ -75,6 +75,7 @@ spec:
       ref:  values
       path: manifests
       directory: 
+        recurse: true
         include: |
           keystone-db-reconcile.yaml
           keystone-fernet-secret-rbac.yaml

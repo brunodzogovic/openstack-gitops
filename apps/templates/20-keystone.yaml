@@ -69,6 +69,34 @@ spec:
                 - op: add
                   path: /metadata/annotations/argocd.argoproj.io~1sync-wave
                   value: "10"
+            - target:
+                kind: Job
+                name: keystone-credential-setup
+              patch: |
+                - op: add
+                  path: /spec/template/spec/automountServiceAccountToken
+                  value: true
+            - target:
+                kind: CronJob
+                name: keystone-credential-rotate
+              patch: |
+                - op: add
+                  path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
+                  value: true
+            - target:
+                kind: Job
+                name: keystone-fernet-setup
+              patch: |
+                - op: add
+                  path: /spec/template/spec/automountServiceAccountToken
+                  value: true
+            - target:
+                kind: CronJob
+                name: keystone-fernet-rotate
+              patch: |
+                - op: add
+                  path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
+                  value: true
 
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}

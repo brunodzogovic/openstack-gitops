@@ -50,9 +50,12 @@ endpoints:
         default: 5672
       http:
         default: 15672
+      management:
+        default: 15672
     path:
       default: /keystone
       admin: ""
+      management: ""
     auth:
       admin:
         username: rabbitmq

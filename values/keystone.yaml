@@ -43,7 +43,7 @@ endpoints:
         default: 5672
     auth:
       admin:
-        username: admin
+        username: keystone
       keystone: 
         username: keystone
 

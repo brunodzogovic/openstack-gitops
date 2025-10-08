@@ -62,6 +62,21 @@ spec:
                   - op: add
                     path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
                     value: BeforeHookCreation
+                  - op: add
+                    path: /spec/template/spec/automountServiceAccountToken
+                    value: true
+                  - op: add
+                    path: /spec/template/spec/containers/0/env/-
+                    value: { name: KEYSTONE_KEYS_REPOSITORY, value: "/etc/keystone/fernet-keys" }
+                  - op: add
+                    path: /spec/template/spec/containers/0/env/-
+                    value: { name: FERNET_KEYS_REPOSITORY,   value: "/etc/keystone/fernet-keys" }
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
               - target:
                   kind: CronJob
                   name: keystone-fernet-rotate

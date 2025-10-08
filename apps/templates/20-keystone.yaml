@@ -20,83 +20,83 @@ spec:
           - $values/values/keystone.yaml
           - $values/values/secrets/secrets.sops.yaml
         postRenderer:
-        kustomize:
-          patches:
-            - target:
-                kind: Job
-                name: keystone-db-init
-              patch: |
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook
-                  value: Sync
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                  value: BeforeHookCreation
-            - target:
-                kind: Job
-                name: keystone-db-sync
-              patch: |
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook
-                  value: Sync
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                  value: BeforeHookCreation
-            - target:
-                kind: Job
-                name: keystone-credential-setup
-              patch: |
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook
-                  value: Sync
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                  value: BeforeHookCreation
-            - target:
-                kind: Job
-                name: keystone-fernet-setup
-              patch: |
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook
-                  value: Sync
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                  value: BeforeHookCreation
-            - target:
-                kind: CronJob
-                name: keystone-fernet-rotate
-              patch: |
-                - op: add
-                  path: /metadata/annotations/argocd.argoproj.io~1sync-wave
-                  value: "10"
-            - target:
-                kind: Job
-                name: keystone-credential-setup
-              patch: |
-                - op: add
-                  path: /spec/template/spec/automountServiceAccountToken
-                  value: true
-            - target:
-                kind: CronJob
-                name: keystone-credential-rotate
-              patch: |
-                - op: add
-                  path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
-                  value: true
-            - target:
-                kind: Job
-                name: keystone-fernet-setup
-              patch: |
-                - op: add
-                  path: /spec/template/spec/automountServiceAccountToken
-                  value: true
-            - target:
-                kind: CronJob
-                name: keystone-fernet-rotate
-              patch: |
-                - op: add
-                  path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
-                  value: true
+          kustomize:
+            patches:
+              - target:
+                  kind: Job
+                  name: keystone-db-init
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target:
+                  kind: Job
+                  name: keystone-db-sync
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target:
+                  kind: Job
+                  name: keystone-credential-setup
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target:
+                  kind: Job
+                  name: keystone-fernet-setup
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target:
+                  kind: CronJob
+                  name: keystone-fernet-rotate
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1sync-wave
+                    value: "10"
+              - target:
+                  kind: Job
+                  name: keystone-credential-setup
+                patch: |
+                  - op: add
+                    path: /spec/template/spec/automountServiceAccountToken
+                    value: true
+              - target:
+                  kind: CronJob
+                  name: keystone-credential-rotate
+                patch: |
+                  - op: add
+                    path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
+                    value: true
+              - target:
+                  kind: Job
+                  name: keystone-fernet-setup
+                patch: |
+                  - op: add
+                    path: /spec/template/spec/automountServiceAccountToken
+                    value: true
+              - target:
+                  kind: CronJob
+                  name: keystone-fernet-rotate
+                patch: |
+                  - op: add
+                    path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
+                    value: true
 
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}

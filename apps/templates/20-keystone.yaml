@@ -99,19 +99,18 @@ spec:
                     path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
                     value: true
               - target:
-                  kind: Job
-                  name: keystone-fernet-setup
-                patch: |
-                  - op: add
-                    path: /spec/template/spec/automountServiceAccountToken
-                    value: true
-              - target:
                   kind: CronJob
                   name: keystone-fernet-rotate
                 patch: |
                   - op: add
                     path: /spec/jobTemplate/spec/template/spec/automountServiceAccountToken
                     value: true
+                  - op: add
+                    path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
+                    value: { name: KEYSTONE_KEYS_REPOSITORY, value: "/etc/keystone/fernet-keys" }
+                  - op: add
+                    path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
+                    value: { name: FERNET_KEYS_REPOSITORY,   value: "/etc/keystone/fernet-keys" }
 
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}

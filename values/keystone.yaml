@@ -77,42 +77,4 @@ endpoints:
         user_domain_name: Default
         project_domain_name: Default
 
-images:
-  tags:
-    # utility images used by setup jobs (these default to Noble on master)
-    ks_user:       docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
-    ks_endpoints:  docker.io/openstackhelm/heat:2024.2-ubuntu_jammy
-    dep_check:     quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_jammy
-    # (optional, but fine to pin too)
-    keystone:      docker.io/openstackhelm/keystone:2024.2-ubuntu_jammy
-
-manifests:
-  secret_rabbitmq: true
-  ingress_api: false
-  ingress_admin: false
-  job_fernet_setup: true
-  job_credential_setup: true
-  job_db_sync: true
-  job_bootstrap: true
-  cron_fernet_rotate: true
-  cron_credential_rotate: true
-
-conf:
-  keystone:
-    token:
-      provider: fernet
-    fernet_tokens:
-      key_repository: /etc/keystone/fernet-keys
-    credential:
-      key_repository: /etc/keystone/credential-keys
-
-# optional: tiny resources for a small cluster; bump later if needed
-resources:
-  enabled: true
-  pod:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-    limits:
-      memory: 512Mi
 

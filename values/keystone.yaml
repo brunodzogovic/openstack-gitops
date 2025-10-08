@@ -2,7 +2,7 @@ pod:
   replicas:
     api: 1
 
-helm3_hook: true
+helm3_hook: false
 
 # Make dependencies explicit so db-init doesn't wait on itself
 dependencies:

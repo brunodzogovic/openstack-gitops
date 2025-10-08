@@ -68,7 +68,7 @@ endpoints:
 
   oslo_cache:
     hosts:
-      default: osh-memcached-memcached
+      default: memcached
     namespace: osh-infra
     port:
       memcache:

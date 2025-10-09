@@ -36,11 +36,16 @@ dependencies:
 
 endpoints: 
   identity:
-    hosts: { default: keystone-api }
+    hosts: 
+      default: keystone-api
     namespace: openstack
-    port: { api: { default: 5000 } }
-    scheme: { default: http }
-    path: { default: /v3 }
+    port:
+      api:
+        default: 5000
+    scheme:
+      default: http
+    path:
+      default: /v3
     auth:
       admin:
         username: admin
@@ -55,11 +60,16 @@ endpoints:
 
   # Placement (Nova talks to it directly)
   placement:
-    hosts: { default: placement-api }
+    hosts:
+      default: placement-api
     namespace: openstack
-    port: { api: { default: 8778 } }
-    scheme: { default: http }
-    path: { default: / }
+    port:
+      api:
+        default: 8778
+    scheme:
+      default: http
+    path:
+      default: /
     auth:
       nova:
         region_name: RegionOne
@@ -68,32 +78,50 @@ endpoints:
   oslo_messaging:
     host_fqdn_overrides:
       default: rabbitmq.osh-infra.svc.cluster.local
-    hosts: { default: rabbitmq }
+    hosts:
+      default: rabbitmq
     namespace: osh-infra
-    scheme: { default: rabbit }
-    port: { amqp: { default: 5672 } }
-    path: { default: /nova }
+    scheme:
+      default: rabbit
+    port:
+      amqp:
+        default: 5672
+    path:
+      default: /nova
     auth:
-      admin: { username: rabbitmq } # pw in secrets.sops.yaml
-      nova: { username: nova } # pw in secrets.sops.yaml
+      admin:
+        username: rabbitmq 
+      nova:
+        username: nova
 
   # Cache
   oslo_cache:
-    hosts: { default: memcached } # you fixed the name—keep it
+    hosts:
+      default: memcached
     namespace: osh-infra
-    port: { memcache: { default: 11211 } }
+    port:
+      memcache:
+        default: 11211
 
   oslo_db:
-    hosts: { default: mariadb }
+    hosts:
+      default: mariadb
     namespace: osh-infra
     scheme: mysql+pymysql
-    port: { mysql: { default: 3306 } }
+    port:
+      mysql:
+        default: 3306
     auth:
-      admin: { username: root }
-      nova:  { username: nova }
-      api:   { username: nova_api }
-      cell0: { username: nova_cell0 }
-      cell1: { username: nova_cell1 }
+      admin:
+        username: root
+      nova:
+        username: nova
+      api:
+        username: nova_api
+      cell0:
+        username: nova_cell0
+      cell1:
+        username: nova_cell1
 
 # Networking driver: Nova will rely on Neutron-OVN later; fine to deploy Nova first.
 conf:

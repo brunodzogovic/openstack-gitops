@@ -34,37 +34,22 @@ dependencies:
       - service: placement-api
         namespace: openstack
 
-endpoints:
-  # Database (API + cell0/cellN live here; OSH handles separate DBs/users)
-  oslo_db:
-    hosts: { default: mariadb }
-    namespace: osh-infra
-    scheme: mysql+pymysql
-    port: { mysql: { default: 3306 } }
-    auth:
-      admin: { username: root } # pw in secrets.sops.yaml
-      nova: { username: nova }
-      api: { username: nova_api }
-      cell0: { username: nova_cell0 }
-      cell1: { username: nova_cell1 } # if you run a single cell, OSH still defines cell1 user
-
-  # Keystone
+endpoints: 
   identity:
     hosts: { default: keystone-api }
     namespace: openstack
     port: { api: { default: 5000 } }
-    scheme: http
+    scheme: { default: http }
     path: { default: /v3 }
     auth:
-      # service user for nova
-      nova:
-        username: nova
-        project_name: service
-        user_domain_name: Default
-        project_domain_name: Default
       admin:
         username: admin
         project_name: admin
+        user_domain_name: Default
+        project_domain_name: Default
+      nova:
+        username: nova
+        project_name: service
         user_domain_name: Default
         project_domain_name: Default
 
@@ -97,6 +82,18 @@ endpoints:
     hosts: { default: memcached } # you fixed the name—keep it
     namespace: osh-infra
     port: { memcache: { default: 11211 } }
+
+  oslo_db:
+    hosts: { default: mariadb }
+    namespace: osh-infra
+    scheme: mysql+pymysql
+    port: { mysql: { default: 3306 } }
+    auth:
+      admin: { username: root }
+      nova:  { username: nova }
+      api:   { username: nova_api }
+      cell0: { username: nova_cell0 }
+      cell1: { username: nova_cell1 }
 
 # Networking driver: Nova will rely on Neutron-OVN later; fine to deploy Nova first.
 conf:

@@ -81,13 +81,11 @@ endpoints:
     hosts:
       default: rabbitmq
     namespace: osh-infra
-    scheme:
-      default: rabbit
+    scheme: rabbit
     port:
       amqp:
         default: 5672
-    path:
-      default: /nova
+    path: /nova
     auth:
       admin:
         username: rabbitmq 

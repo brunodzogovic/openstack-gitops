@@ -1,4 +1,4 @@
-helm3_hook: false
+helm3_hook: true
 
 pod:
   replicas:

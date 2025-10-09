@@ -28,7 +28,7 @@ endpoints:
   oslo_messaging:
     # rabbit lives in osh-infra; this matters for FQDN generation/templating
     namespace: osh-infra
-    host_fqdn_override:
+    host_fqdn_overrides:
       # hard-set the fully-qualified host the jobs should use for mgmt HTTP API
       # (adjust name if your svc is different; often it's osh-rabbitmq-mgr)
       default: rabbitmq.osh-infra.svc.cluster.local

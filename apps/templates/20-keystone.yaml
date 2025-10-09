@@ -111,7 +111,13 @@ spec:
                   - op: add
                     path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
                     value: { name: FERNET_KEYS_REPOSITORY,   value: "/etc/keystone/fernet-keys" }
-
+              - target:
+                  kind: Deployment
+                  name: keystone-api
+                    patch: |
+                      - op: add
+                        path: /spec/template/spec/automountServiceAccountToken
+                        value: true
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values

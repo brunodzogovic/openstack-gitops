@@ -39,6 +39,30 @@ spec:
                   - op: add
                     path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
                     value: BeforeHookCreation
+              - target: { kind: Job, name: placement-ks-user }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target: { kind: Job, name: placement-ks-service }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target: { kind: Job, name: placement-ks-endpoints }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values

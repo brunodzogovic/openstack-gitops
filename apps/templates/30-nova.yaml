@@ -10,15 +10,48 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
-  source:
-    repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
-    path: nova
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
-        - $values/values/nova-compute.yaml
-        - $values/values/secrets.sample.yaml
+  sources:
+    - repoURL: {{ .Values.repos.osh }}
+      targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
+      path: nova
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/nova-compute.yaml   # you already have this
+          - $values/values/secrets/secrets.sops.yaml
+        postRenderer:
+          kustomize:
+            patches:
+              # Make Cellv2 jobs re-run on each sync (helps while iterating)
+              - target: { kind: Job, name: nova-db-init }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target: { kind: Job, name: nova-db-sync }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target: { kind: Job, name: nova-cell-setup }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      # keep Replace off here unless you need a first-time nuke of immutable fields

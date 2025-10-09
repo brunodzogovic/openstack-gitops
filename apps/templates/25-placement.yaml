@@ -10,14 +10,40 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
-  source:
-    repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
-    path: placement
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
-        - $values/values/secrets.sample.yaml 
+  sources:
+    - repoURL: {{ .Values.repos.osh }}
+      targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
+      path: placement
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/placement.yaml
+          - $values/values/secrets/secrets.sops.yaml
+        postRenderer:
+          kustomize:
+            patches:
+              # Make sure jobs run every sync and pick up changes
+              - target: { kind: Job, name: placement-db-init }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+              - target: { kind: Job, name: placement-db-sync }
+                patch: |
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook
+                    value: Sync
+                  - op: add
+                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
+                    value: BeforeHookCreation
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-
+    syncOptions:
+      - Replace=true
+      - ApplyOutOfSyncOnly=true

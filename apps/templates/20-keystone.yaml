@@ -130,5 +130,17 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - ApplyOutOfSyncOnly=true
-      - Replace=true   # <— this is the key
+      - ApplyOutOfSyncOnly=true 
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: keystone-fernet-keys
+      namespace: {{ .Values.namespaces.os }}
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: keystone-credential-keys
+      namespace: {{ .Values.namespaces.os }}
+      jsonPointers:
+        - /data

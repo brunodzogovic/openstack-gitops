@@ -58,7 +58,7 @@ endpoints:
     hosts: { default: placement-api }
     namespace: openstack
     port: { api: { default: 8778 } }
-    scheme: http
+    scheme: { default: http }
     path: { default: / }
     auth:
       nova:

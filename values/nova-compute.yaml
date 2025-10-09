@@ -42,11 +42,11 @@ endpoints:
     scheme: mysql+pymysql
     port: { mysql: { default: 3306 } }
     auth:
-      admin:     { username: root }       # pw in secrets.sops.yaml
-      nova:      { username: nova }
-      api:       { username: nova_api }
-      cell0:     { username: nova_cell0 }
-      cell1:     { username: nova_cell1 } # if you run a single cell, OSH still defines cell1 user
+      admin: { username: root } # pw in secrets.sops.yaml
+      nova: { username: nova }
+      api: { username: nova_api }
+      cell0: { username: nova_cell0 }
+      cell1: { username: nova_cell1 } # if you run a single cell, OSH still defines cell1 user
 
   # Keystone
   identity:
@@ -89,12 +89,12 @@ endpoints:
     port: { amqp: { default: 5672 } }
     path: { default: /nova }
     auth:
-      admin: { username: rabbitmq }  # pw in secrets.sops.yaml
-      nova:  { username: nova }      # pw in secrets.sops.yaml
+      admin: { username: rabbitmq } # pw in secrets.sops.yaml
+      nova: { username: nova } # pw in secrets.sops.yaml
 
   # Cache
   oslo_cache:
-    hosts: { default: memcached }   # you fixed the name—keep it
+    hosts: { default: memcached } # you fixed the name—keep it
     namespace: osh-infra
     port: { memcache: { default: 11211 } }
 
@@ -103,6 +103,5 @@ conf:
   nova:
     DEFAULT:
       debug: false
-      transport_url: ""   # chart renders from oslo_messaging
+      transport_url: "" # chart renders from oslo_messaging
       # ensure cells v2 mapping uses Placement; OSH templates set this correctly
-

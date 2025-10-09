@@ -114,15 +114,15 @@ spec:
               - target:
                   kind: Deployment
                   name: keystone-api
-                    patch: |
-                      - op: add
-                        path: /spec/template/spec/automountServiceAccountToken
-                        value: true
+                  patch: |
+                    - op: add
+                      path: /spec/template/spec/automountServiceAccountToken
+                      value: true
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
       path: manifests
-      directory: 
+      directory:
         recurse: true
         include: keystone/**.yaml
   syncPolicy:
@@ -131,4 +131,4 @@ spec:
       selfHeal: true
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      - Replace=true   # <— this is the key 
+      - Replace=true   # <— this is the key

@@ -88,7 +88,7 @@ spec:
       serviceAccountName: ceph-bridge
       containers:
         - name: kubectl
-          image: bitnami/kubectl:latest
+          image: docker.io/bitnami/kubectl:latest
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:

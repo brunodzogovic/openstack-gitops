@@ -4,21 +4,21 @@ kind: ServiceAccount
 metadata:
   name: ceph-bridge
   namespace: openstack
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1" 
 ---
-# Read-only in rook-ceph for the few objects we need
+# Read-only in rook-ceph for the two objects we need
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: ceph-bridge-rook-reader
   namespace: rook-ceph
-  annotations: 
-    argocd.argoproj.io/sync-wave: "-1" 
 rules:
   - apiGroups: [""]
-    resources: ["configmaps","secrets"]
+    resources: ["secrets"]
     resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring"]
+    verbs: ["get","list","watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["rook-ceph-config"]
     verbs: ["get","list","watch"]
 ---
 # Writer in openstack for the targets Nova expects
@@ -27,8 +27,6 @@ kind: Role
 metadata:
   name: ceph-bridge-openstack-writer
   namespace: openstack
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1" 
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -45,8 +43,6 @@ kind: RoleBinding
 metadata:
   name: ceph-bridge-rook-reader-binding
   namespace: rook-ceph
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1" 
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -62,8 +58,6 @@ kind: RoleBinding
 metadata:
   name: ceph-bridge-openstack-writer-binding
   namespace: openstack
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -79,7 +73,8 @@ metadata:
   name: ceph-bridge-presync
   namespace: openstack
   annotations:
-    argocd.argoproj.io/sync-wave: "0"  
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   backoffLimit: 3
   template:
@@ -88,34 +83,56 @@ spec:
       serviceAccountName: ceph-bridge
       containers:
         - name: kubectl
-          image: docker.io/bitnami/kubectl:latest
+          image: registry.k8s.io/kubectl:v1.29.3
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
             - |
               set -euo pipefail
 
-              echo "[1/3] Extract ceph.conf from rook-ceph/rook-ceph-config"
-              kubectl -n rook-ceph get configmap rook-ceph-config \
-                -o go-template='{{index .data "config"}}' > /work/ceph.conf
+              # Helper: read ceph.conf from Secret or ConfigMap, various keys
+              fetch_ceph_conf() {
+                # Try Secret first (your cluster shows rook-ceph-config as a Secret)
+                if kubectl -n rook-ceph get secret rook-ceph-config >/dev/null 2>&1; then
+                  for KEY in ceph.conf config; do
+                    if kubectl -n rook-ceph get secret rook-ceph-config -o "jsonpath={.data.${KEY}}" 2>/dev/null | grep -q .; then
+                      kubectl -n rook-ceph get secret rook-ceph-config -o "jsonpath={.data.${KEY}}" | base64 -d > /work/ceph.conf
+                      return 0
+                    fi
+                  done
+                fi
+                # Fallback: ConfigMap (some clusters expose it as a CM)
+                if kubectl -n rook-ceph get configmap rook-ceph-config >/dev/null 2>&1; then
+                  for KEY in ceph.conf config; do
+                    if kubectl -n rook-ceph get configmap rook-ceph-config -o "jsonpath={.data.${KEY}}" 2>/dev/null | grep -q .; then
+                      kubectl -n rook-ceph get configmap rook-ceph-config -o "jsonpath={.data.${KEY}}" > /work/ceph.conf
+                      return 0
+                    fi
+                  done
+                fi
+                echo "ERROR: could not find ceph.conf in rook-ceph/rook-ceph-config (Secret or ConfigMap)"; exit 1
+              }
 
-              echo "[2/3] Upsert ConfigMap openstack/ceph-etc"
+              echo "[1/3] Fetching ceph.conf"
+              mkdir -p /work
+              fetch_ceph_conf
+
+              echo "[2/3] Upserting ConfigMap openstack/ceph-etc"
               kubectl -n openstack create configmap ceph-etc \
                 --from-file=ceph.conf=/work/ceph.conf \
                 --dry-run=client -o yaml | kubectl apply -f -
 
               echo "[3/3] Extract admin key and upsert Secret openstack/pvc-ceph-client-key"
-              KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring \
-                -o go-template='{{index .data "keyring"}}')
+              KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o jsonpath='{.data.keyring}')
               KEY_RAW=$(printf "%s" "$KEY_B64" | base64 -d | sed -n 's/^[[:space:]]*key[[:space:]]*=[[:space:]]*\(.*\)$/\1/p' | tr -d '\r')
               if [ -z "${KEY_RAW}" ]; then
-                echo "Failed to parse admin key from rook-ceph-admin-keyring"; exit 1
+                echo "ERROR: failed to parse admin key from rook-ceph-admin-keyring"; exit 1
               fi
               kubectl -n openstack create secret generic pvc-ceph-client-key \
                 --from-literal=key="$KEY_RAW" \
                 --dry-run=client -o yaml | kubectl apply -f -
 
-              echo "Done."
+              echo "Bridge complete."
           volumeMounts:
             - name: work
               mountPath: /work

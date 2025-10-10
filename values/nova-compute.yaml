@@ -158,6 +158,7 @@ endpoints:
 
   oslo_db_api:
     hosts: { default: mariadb }
+    namespace: osh-infra
     path: /nova_api
     scheme: mysql+pymysql
     port: { mysql: { default: 3306 } }
@@ -167,6 +168,7 @@ endpoints:
 
   oslo_db_cell0:
     hosts: { default: mariadb }
+    namespace: osh-infra
     path: /nova_cell0
     scheme: mysql+pymysql
     port: { mysql: { default: 3306 } }

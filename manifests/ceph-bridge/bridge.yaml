@@ -1,0 +1,131 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ceph-bridge
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+---
+# Read-only in rook-ceph for the few objects we need
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-bridge-rook-reader
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps","secrets"]
+    resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring"]
+    verbs: ["get","list","watch"]
+---
+# Writer in openstack for the targets Nova expects
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-bridge-openstack-writer
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["ceph-etc"]
+    verbs: ["get","create","update","patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["pvc-ceph-client-key"]
+    verbs: ["get","create","update","patch"]
+---
+# Bind reader role (in rook-ceph) to SA in openstack
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-bridge-rook-reader-binding
+  namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+subjects:
+  - kind: ServiceAccount
+    name: ceph-bridge
+    namespace: openstack
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-bridge-rook-reader
+---
+# Bind writer role (in openstack) to SA in openstack
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-bridge-openstack-writer-binding
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+subjects:
+  - kind: ServiceAccount
+    name: ceph-bridge
+    namespace: openstack
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-bridge-openstack-writer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-bridge-presync
+  namespace: openstack
+  annotations:
+    # Make Argo CD run this before Helm renders Nova
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: ceph-bridge
+      containers:
+        - name: kubectl
+          image: bitnami/kubectl:1.29
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              set -euo pipefail
+
+              echo "[1/3] Extract ceph.conf from rook-ceph/rook-ceph-config"
+              kubectl -n rook-ceph get configmap rook-ceph-config \
+                -o go-template='{{index .data "config"}}' > /work/ceph.conf
+
+              echo "[2/3] Upsert ConfigMap openstack/ceph-etc"
+              kubectl -n openstack create configmap ceph-etc \
+                --from-file=ceph.conf=/work/ceph.conf \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+              echo "[3/3] Extract admin key and upsert Secret openstack/pvc-ceph-client-key"
+              KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring \
+                -o go-template='{{index .data "keyring"}}')
+              KEY_RAW=$(printf "%s" "$KEY_B64" | base64 -d | sed -n 's/^[[:space:]]*key[[:space:]]*=[[:space:]]*\(.*\)$/\1/p' | tr -d '\r')
+              if [ -z "${KEY_RAW}" ]; then
+                echo "Failed to parse admin key from rook-ceph-admin-keyring"; exit 1
+              fi
+              kubectl -n openstack create secret generic pvc-ceph-client-key \
+                --from-literal=key="$KEY_RAW" \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+              echo "Done."
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: work
+          emptyDir: {}

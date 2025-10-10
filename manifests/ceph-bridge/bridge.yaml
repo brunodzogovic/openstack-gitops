@@ -83,7 +83,7 @@ spec:
       serviceAccountName: ceph-bridge
       containers:
         - name: kubectl
-          image: registry.k8s.io/kubectl:v1.29.3
+          image: docker.io/kubectl:latest
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:

@@ -60,4 +60,4 @@ spec:
     automated: { prune: true, selfHeal: true }
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      - Replace=true # keep Replace off here unless you need a first-time nuke of immutable fields
+      #- Replace=true # keep Replace off here unless you need a first-time nuke of immutable fields

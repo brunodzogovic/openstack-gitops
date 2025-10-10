@@ -14,6 +14,12 @@ manifests:
   ingress_api: false
   ingress_novncproxy: false
   secret_rabbitmq: true
+  job_db_init: true
+  job_db_sync: true
+  job_rabbit_init: true
+  job_ks_user: true
+  job_ks_service: true
+  job_ks_endpoints: true
 
 # Nova waits for infra and service deps before starting
 dependencies:

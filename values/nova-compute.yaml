@@ -57,14 +57,14 @@ endpoints:
         region_name: RegionOne
         username: nova_service_user
         project_name: service
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
       neutron:
         role: admin,service
         region_name: RegionOne
         project_name: service
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
         username: nova_neutron
       ironic:
         role: admin,service
@@ -72,30 +72,30 @@ endpoints:
         auth_version: v3
         region_name: RegionOne
         project_name: service
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
         username: nova_ironic
       placement:
         role: admin,service
         region_name: RegionOne
         username: nova_placement
         project_name: service
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
       cinder:
         role: admin,service
         region_name: RegionOne
         username: nova_cinder
         project_name: service
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
       test:
         role: admin
         region_name: RegionOne
         username: nova-test
         project_name: test
-        user_domain_name: service
-        project_domain_name: service
+        user_domain_name: Default
+        project_domain_name: Default
 
   placement:
     hosts:

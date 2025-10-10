@@ -27,11 +27,13 @@ manifests:
 endpoints:
   identity:
     hosts:
-      default: keystone-api
+      default: keystone
+      internal: keystone-api
     namespace: openstack
     port:
       api:
-        default: 5000
+        default: 80
+        internal: 5000
     scheme:
       default: http
     path:
@@ -44,11 +46,56 @@ endpoints:
         user_domain_name: default
         project_domain_name: default
       nova:
+        role: admin,service
         region_name: RegionOne
         username: nova
         project_name: service
         user_domain_name: default
         project_domain_name: default
+      service:
+        role: admin,service
+        region_name: RegionOne
+        username: nova_service_user
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      neutron:
+        role: admin,service
+        region_name: RegionOne
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+        username: nova_neutron
+      ironic:
+        role: admin,service
+        auth_type: password
+        auth_version: v3
+        region_name: RegionOne
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+        username: nova_ironic
+      placement:
+        role: admin,service
+        region_name: RegionOne
+        username: nova_placement
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      cinder:
+        role: admin,service
+        region_name: RegionOne
+        username: nova_cinder
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+      test:
+        role: admin
+        region_name: RegionOne
+        username: nova-test
+        project_name: test
+        user_domain_name: service
+        project_domain_name: service
 
   placement:
     hosts:
@@ -98,6 +145,7 @@ endpoints:
       default: mariadb
     namespace: osh-infra
     scheme: mysql+pymysql
+    path: /nova
     port:
       mysql:
         default: 3306
@@ -107,6 +155,35 @@ endpoints:
       api:   { username: nova_api }
       cell0: { username: nova_cell0 }
       cell1: { username: nova_cell1 }
+
+  oslo_db_api:
+    hosts: { default: mariadb }
+    path: /nova_api
+    scheme: mysql+pymysql
+    port: { mysql: { default: 3306 } }
+    auth:
+      admin: { username: root }
+      nova:  { username: nova }
+
+  oslo_db_cell0:
+    hosts: { default: mariadb }
+    path: /nova_cell0
+    scheme: mysql+pymysql
+    port: { mysql: { default: 3306 } }
+    auth:
+      admin: { username: root }
+      nova:  { username: nova }
+
+  oslo_messaging:
+    hosts: { default: rabbitmq }
+    path: /nova
+    scheme: rabbit
+    port:
+      amqp: { default: 5672 }
+      http: { default: 15672 }
+    auth:
+      admin: { username: rabbitmq }
+      nova:  { username: nova }
 
 conf:
   nova:

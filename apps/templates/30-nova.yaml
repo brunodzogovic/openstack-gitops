@@ -24,7 +24,7 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/nova-compute.yaml
-          #- $values/values/secrets/secrets.sops.yaml
+          - $values/values/secrets/secrets.sops.yaml
         postRenderer:
           kustomize:
             patches:

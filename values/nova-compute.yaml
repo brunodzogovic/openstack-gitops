@@ -177,6 +177,9 @@ endpoints:
       nova:  { username: nova }
 
   oslo_messaging:
+    statefulset: null
+    host_fqdn_overrides:
+      default: rabbitmq.osh-infra.svc.cluster.local
     hosts: { default: rabbitmq }
     namespace: osh-infra
     path: /nova

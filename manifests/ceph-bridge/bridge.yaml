@@ -90,34 +90,38 @@ spec:
             - |
               set -euo pipefail
 
-              # Helper: read ceph.conf from Secret or ConfigMap, various keys
-              fetch_ceph_conf() {
-                # Try Secret first (your cluster shows rook-ceph-config as a Secret)
+              get_ceph_conf() {
+                # 1) Secret/rook-ceph-config.ceph.conf (base64)
                 if kubectl -n rook-ceph get secret rook-ceph-config >/dev/null 2>&1; then
-                  for KEY in ceph.conf config; do
-                    if kubectl -n rook-ceph get secret rook-ceph-config -o "jsonpath={.data.${KEY}}" 2>/dev/null | grep -q .; then
-                      kubectl -n rook-ceph get secret rook-ceph-config -o "jsonpath={.data.${KEY}}" | base64 -d > /work/ceph.conf
-                      return 0
-                    fi
-                  done
+                  CEPh_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.ceph\.conf}' || true)
+                  if [ -n "${CEPh_B64}" ]; then
+                    printf "%s" "${CEPh_B64}" | base64 -d > /work/ceph.conf
+                    return 0
+                  fi
                 fi
-                # Fallback: ConfigMap (some clusters expose it as a CM)
+                # 2) ConfigMap/rook-ceph-config.ceph.conf (plain)
                 if kubectl -n rook-ceph get configmap rook-ceph-config >/dev/null 2>&1; then
-                  for KEY in ceph.conf config; do
-                    if kubectl -n rook-ceph get configmap rook-ceph-config -o "jsonpath={.data.${KEY}}" 2>/dev/null | grep -q .; then
-                      kubectl -n rook-ceph get configmap rook-ceph-config -o "jsonpath={.data.${KEY}}" > /work/ceph.conf
-                      return 0
-                    fi
-                  done
+                  if kubectl -n rook-ceph get configmap rook-ceph-config -o jsonpath='{.data.ceph\.conf}' >/work/ceph.conf 2>/dev/null; then
+                    [ -s /work/ceph.conf ] && return 0
+                  fi
+                  # 3) ConfigMap/rook-ceph-config.config (older templates)
+                  if kubectl -n rook-ceph get configmap rook-ceph-config -o jsonpath='{.data.config}' >/work/ceph.conf 2>/dev/null; then
+                    [ -s /work/ceph.conf ] && return 0
+                  fi
                 fi
-                echo "ERROR: could not find ceph.conf in rook-ceph/rook-ceph-config (Secret or ConfigMap)"; exit 1
+                return 1
               }
 
               echo "[1/3] Fetching ceph.conf"
-              mkdir -p /work
-              fetch_ceph_conf
+              if ! get_ceph_conf; then
+                echo "ERROR: could not find ceph.conf in rook-ceph/rook-ceph-config (Secret or ConfigMap)"
+                echo "DEBUG: available keys on secret/configmap (if present):"
+                kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data}' 2>/dev/null || true; echo
+                kubectl -n rook-ceph get configmap rook-ceph-config -o jsonpath='{.data}' 2>/dev/null || true; echo
+                exit 1
+              fi
 
-              echo "[2/3] Upserting ConfigMap openstack/ceph-etc"
+              echo "[2/3] Upsert ConfigMap openstack/ceph-etc"
               kubectl -n openstack create configmap ceph-etc \
                 --from-file=ceph.conf=/work/ceph.conf \
                 --dry-run=client -o yaml | kubectl apply -f -
@@ -126,13 +130,14 @@ spec:
               KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o jsonpath='{.data.keyring}')
               KEY_RAW=$(printf "%s" "$KEY_B64" | base64 -d | sed -n 's/^[[:space:]]*key[[:space:]]*=[[:space:]]*\(.*\)$/\1/p' | tr -d '\r')
               if [ -z "${KEY_RAW}" ]; then
-                echo "ERROR: failed to parse admin key from rook-ceph-admin-keyring"; exit 1
+                echo "ERROR: failed to parse admin key from rook-ceph-admin-keyring"
+                exit 1
               fi
               kubectl -n openstack create secret generic pvc-ceph-client-key \
                 --from-literal=key="$KEY_RAW" \
                 --dry-run=client -o yaml | kubectl apply -f -
 
-              echo "Bridge complete."
+              echo "Done." 
           volumeMounts:
             - name: work
               mountPath: /work

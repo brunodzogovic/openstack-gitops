@@ -4,8 +4,11 @@ kind: ServiceAccount
 metadata:
   name: ceph-bridge
   namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-3"
 ---
-# Read-only in rook-ceph for the two objects we need
+# Read-only in rook-ceph for the few objects we need
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -13,15 +16,14 @@ metadata:
   namespace: rook-ceph
   annotations:
     argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
     resources: ["secrets","configmaps"]
-    resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring","rook-ceph-mon"]
-    verbs: ["get","list","watch"]
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    resourceNames: ["rook-ceph-config"]
+    resourceNames:
+      - rook-ceph-config
+      - rook-ceph-admin-keyring
+      - rook-ceph-mon
     verbs: ["get","list","watch"]
 ---
 # Writer in openstack for the targets Nova expects
@@ -30,15 +32,27 @@ kind: Role
 metadata:
   name: ceph-bridge-openstack-writer
   namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-3"
 rules:
+  # Create must NOT use resourceNames
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+
+  # Named ops for our specific objects
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["ceph-etc"]
-    verbs: ["get","create","update","patch"]
+    verbs: ["get","update","patch"]
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["pvc-ceph-client-key"]
-    verbs: ["get","create","update","patch"]
+    verbs: ["get","update","patch"]
 ---
 # Bind reader role (in rook-ceph) to SA in openstack
 apiVersion: rbac.authorization.k8s.io/v1
@@ -48,7 +62,7 @@ metadata:
   namespace: rook-ceph
   annotations:
     argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -66,7 +80,7 @@ metadata:
   namespace: openstack
   annotations:
     argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -82,27 +96,24 @@ metadata:
   name: ceph-bridge-presync
   namespace: openstack
   annotations:
-    annotations:
-    argocd.argoproj.io/sync-wave: "0"
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   backoffLimit: 3
   template:
     spec:
-      restartPolicy: Never
       serviceAccountName: ceph-bridge
+      restartPolicy: Never
       containers:
         - name: kubectl
           image: docker.io/bitnami/kubectl:latest
-          imagePullPolicy: IfNotPresent 
+          imagePullPolicy: IfNotPresent
           command: ["/bin/sh","-c"]
           args:
             - |
               set -euo pipefail
-
               echo "[1/3] Building ceph.conf from rook-ceph-config"
-              # mon_host / mon_initial_members live in *secret* rook-ceph-config
               MH_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_host}' || true)
               MIM_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_initial_members}' || true)
               if [ -z "${MH_B64}" ] || [ -z "${MIM_B64}" ]; then
@@ -110,20 +121,15 @@ spec:
               fi
               MON_HOST=$(printf "%s" "${MH_B64}" | base64 -d | tr -d '\r')
               MON_MEMBERS=$(printf "%s" "${MIM_B64}" | base64 -d | tr -d ' \r\n')
-
-              # fsid is optional but nice to have
               FSID_B64=$(kubectl -n rook-ceph get secret rook-ceph-mon -o jsonpath='{.data.fsid}' 2>/dev/null || true)
               FSID=""
               [ -n "${FSID_B64}" ] && FSID=$(printf "%s" "${FSID_B64}" | base64 -d | tr -d '\r')
-
               cat >/work/ceph.conf <<EOF
               [global]
               mon_host = ${MON_HOST}
               mon_initial_members = ${MON_MEMBERS}
               EOF
-              if [ -n "${FSID}" ]; then
-                echo "fsid = ${FSID}" >> /work/ceph.conf
-              fi
+              if [ -n "${FSID}" ]; then echo "fsid = ${FSID}" >> /work/ceph.conf; fi
 
               echo "[2/3] Upsert ConfigMap openstack/ceph-etc"
               kubectl -n openstack create configmap ceph-etc \
@@ -140,10 +146,11 @@ spec:
                 --from-literal=key="$KEY_RAW" \
                 --dry-run=client -o yaml | kubectl apply -f -
 
-              echo "Done." 
+              echo "Done."
           volumeMounts:
             - name: work
               mountPath: /work
       volumes:
         - name: work
           emptyDir: {}
+

@@ -43,15 +43,15 @@ endpoints:
         region_name: RegionOne
         username: admin
         project_name: admin
-        user_domain_name: default
-        project_domain_name: default
+        user_domain_name: Default
+        project_domain_name: Default
       nova:
         role: admin,service
         region_name: RegionOne
         username: nova
         project_name: service
-        user_domain_name: default
-        project_domain_name: default
+        user_domain_name: Default
+        project_domain_name: Default
       service:
         role: admin,service
         region_name: RegionOne

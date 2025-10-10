@@ -11,10 +11,13 @@ kind: Role
 metadata:
   name: ceph-bridge-rook-reader
   namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
 rules:
   - apiGroups: [""]
-    resources: ["secrets"]
-    resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring"]
+    resources: ["secrets","configmaps"]
+    resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring","rook-ceph-mon"]
     verbs: ["get","list","watch"]
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -43,6 +46,9 @@ kind: RoleBinding
 metadata:
   name: ceph-bridge-rook-reader-binding
   namespace: rook-ceph
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -58,6 +64,9 @@ kind: RoleBinding
 metadata:
   name: ceph-bridge-openstack-writer-binding
   namespace: openstack
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -73,6 +82,8 @@ metadata:
   name: ceph-bridge-presync
   namespace: openstack
   annotations:
+    annotations:
+    argocd.argoproj.io/sync-wave: "0"
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:

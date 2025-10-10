@@ -1,3 +1,5 @@
+helm3_hook: true
+
 pod:
   replicas:
     api: 1
@@ -12,3 +14,121 @@ manifests:
   ingress_api: false
   ingress_novncproxy: false
   secret_rabbitmq: true
+
+# Nova waits for infra and service deps before starting
+dependencies:
+  db_init:
+    services:
+      - service: mariadb
+        namespace: osh-infra
+  db_sync:
+    jobs:
+      - nova-db-init
+    services:
+      - service: mariadb
+        namespace: osh-infra
+  keystone:
+    services:
+      - service: keystone-api
+        namespace: openstack
+  placement:
+    services:
+      - service: placement-api
+        namespace: openstack
+
+endpoints: 
+  identity:
+    hosts: 
+      default: keystone-api
+    namespace: openstack
+    port:
+      api:
+        default: 5000
+    scheme:
+      default: http
+    path:
+      default: /v3
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        project_name: admin
+        user_domain_name: Default
+        project_domain_name: Default
+      nova:
+        region_name: RegionOne
+        username: nova
+        project_name: service
+        user_domain_name: Default
+        project_domain_name: Default
+
+  # Placement (Nova talks to it directly)
+  placement:
+    hosts:
+      default: placement-api
+    namespace: openstack
+    port:
+      api:
+        default: 8778
+    scheme:
+      default: http
+    path:
+      default: /
+    auth:
+      nova:
+        region_name: RegionOne
+
+  # RabbitMQ (same FQDN style as used for Keystone/Placement)
+  oslo_messaging:
+    host_fqdn_overrides:
+      default: rabbitmq.osh-infra.svc.cluster.local
+    hosts:
+      default: rabbitmq
+    namespace: osh-infra
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+    path: /nova
+    auth:
+      admin:
+        username: rabbitmq 
+      nova:
+        username: nova
+
+  # Cache
+  oslo_cache:
+    hosts:
+      default: memcached
+    namespace: osh-infra
+    port:
+      memcache:
+        default: 11211
+
+  oslo_db:
+    hosts:
+      default: mariadb
+    namespace: osh-infra
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+    auth:
+      admin:
+        username: root
+      nova:
+        username: nova
+      api:
+        username: nova_api
+      cell0:
+        username: nova_cell0
+      cell1:
+        username: nova_cell1
+
+# Networking driver: Nova will rely on Neutron-OVN later; fine to deploy Nova first.
+conf:
+  nova:
+    DEFAULT:
+      debug: false
+      transport_url: "" # chart renders from oslo_messaging
+      # ensure cells v2 mapping uses Placement; OSH templates set this correctly

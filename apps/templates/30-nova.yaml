@@ -18,7 +18,7 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/nova-compute.yaml
-            #- $values/values/secrets/secrets.sops.yaml
+          #- $values/values/secrets/secrets.sops.yaml
         postRenderer:
           kustomize:
             patches:
@@ -54,4 +54,4 @@ spec:
     automated: { prune: true, selfHeal: true }
     syncOptions:
       - ApplyOutOfSyncOnly=true
-      # keep Replace off here unless you need a first-time nuke of immutable fields
+      - Replace=true # keep Replace off here unless you need a first-time nuke of immutable fields

@@ -10,15 +10,19 @@ pod:
 manifests:
   ingress_api: false
   ingress_novncproxy: false
-  secret_rabbitmq: true
-  # hard-enable the bootstrap jobs we need
+  secret_rabbitmq: true 
   job_db_init: true
   job_db_sync: true
   job_rabbit_init: true
   job_ks_user: true
   job_ks_service: true
   job_ks_endpoints: true
-
+  secret_db: true
+  secret_db_api: true
+  secret_db_cell0: true
+  secret_keystone: true
+  secret_rabbitmq: true
+  secret_ks_etc: true
 endpoints:
   identity:
     hosts:

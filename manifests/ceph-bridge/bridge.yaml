@@ -5,9 +5,7 @@ metadata:
   name: ceph-bridge
   namespace: openstack
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "-1" 
 ---
 # Read-only in rook-ceph for the few objects we need
 apiVersion: rbac.authorization.k8s.io/v1
@@ -15,10 +13,8 @@ kind: Role
 metadata:
   name: ceph-bridge-rook-reader
   namespace: rook-ceph
-  annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+  annotations: 
+    argocd.argoproj.io/sync-wave: "-1" 
 rules:
   - apiGroups: [""]
     resources: ["configmaps","secrets"]
@@ -32,9 +28,7 @@ metadata:
   name: ceph-bridge-openstack-writer
   namespace: openstack
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "-1" 
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -52,9 +46,7 @@ metadata:
   name: ceph-bridge-rook-reader-binding
   namespace: rook-ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "-1" 
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -71,9 +63,7 @@ metadata:
   name: ceph-bridge-openstack-writer-binding
   namespace: openstack
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "-1"
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 subjects:
   - kind: ServiceAccount
     name: ceph-bridge
@@ -89,9 +79,7 @@ metadata:
   name: ceph-bridge-presync
   namespace: openstack
   annotations:
-    # Make Argo CD run this before Helm renders Nova
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "0"  
 spec:
   backoffLimit: 3
   template:

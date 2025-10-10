@@ -14,8 +14,7 @@ kind: Role
 metadata:
   name: ceph-bridge-rook-reader
   namespace: rook-ceph
-  annotations:
-    argocd.argoproj.io/hook: PreSync
+  annotations: 
     argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
@@ -33,7 +32,6 @@ metadata:
   name: ceph-bridge-openstack-writer
   namespace: openstack
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "-3"
 rules:
   # Create must NOT use resourceNames
@@ -61,7 +59,6 @@ metadata:
   name: ceph-bridge-rook-reader-binding
   namespace: rook-ceph
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
@@ -79,7 +76,6 @@ metadata:
   name: ceph-bridge-openstack-writer-binding
   namespace: openstack
   annotations:
-    argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/sync-wave: "-2"
 subjects:
   - kind: ServiceAccount
@@ -97,7 +93,7 @@ metadata:
   namespace: openstack
   annotations:
     argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   backoffLimit: 3

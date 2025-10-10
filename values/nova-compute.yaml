@@ -178,6 +178,7 @@ endpoints:
 
   oslo_messaging:
     hosts: { default: rabbitmq }
+    namespace: osh-infra
     path: /nova
     scheme: rabbit
     port:

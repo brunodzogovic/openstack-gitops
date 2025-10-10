@@ -84,8 +84,7 @@ spec:
       containers:
         - name: kubectl
           image: docker.io/bitnami/kubectl:latest
-          imagePullPolicy: IfNotPresent
-          restartPolicy: Never
+          imagePullPolicy: IfNotPresent 
           command: ["/bin/sh","-c"]
           args:
             - |

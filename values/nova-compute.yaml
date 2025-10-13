@@ -183,8 +183,16 @@ conf:
     placement:
       region_name: RegionOne
     DEFAULT:
-      debug: false
+      debug: true
       transport_url: ""
+    oslo_messaging_rabbit:
+      rabbit_userid: nova
+      rabbit_password: telen0rtcocl0ud
+      rabbit_virtual_host: nova
+      heartbeat_timeout_threshold: 120
+      heartbeat_rate: 2
+      connection_attempts: 30
+      retry_delay: 5
   ceph:
     enabled: true
   ceph_client:

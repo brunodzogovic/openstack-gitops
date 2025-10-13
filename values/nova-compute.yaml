@@ -114,18 +114,19 @@ endpoints:
         region_name: RegionOne
 
   oslo_messaging:
+    statefulset: null
     host_fqdn_overrides:
       default: rabbitmq.osh-infra.svc.cluster.local
     hosts:
       default: rabbitmq
     namespace: osh-infra
-    scheme:
-      default: rabbit
+    scheme: rabbit
     port:
       amqp:
         default: 5672
-    path:
-      default: /nova
+      http:
+        default: 156762
+    path: /nova
     auth:
       admin:
         username: rabbitmq

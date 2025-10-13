@@ -174,23 +174,7 @@ endpoints:
     port: { mysql: { default: 3306 } }
     auth:
       admin: { username: root }
-      nova:  { username: nova }
-
-  oslo_messaging:
-    statefulset: null
-    host_fqdn_overrides:
-      default: rabbitmq.osh-infra.svc.cluster.local
-    hosts: { default: rabbitmq }
-    namespace: osh-infra
-    path: /nova
-    scheme: rabbit
-    port:
-      amqp: { default: 5672 }
-      http: { default: 15672 }
-    auth:
-      admin: { username: rabbitmq }
-      nova:  { username: nova }
-
+      nova:  { username: nova } 
 conf:
   nova:
     placement:

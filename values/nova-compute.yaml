@@ -27,7 +27,7 @@ manifests:
 endpoints:
   identity:
     hosts:
-      default: keystone
+      default: keystone-api
       internal: keystone-api
     namespace: openstack
     port:

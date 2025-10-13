@@ -6,7 +6,18 @@ pod:
     conductor: 1
     scheduler: 1
     novncproxy: 1
-
+  env:
+    nova:
+      NOVA_SCHEDULER:
+        - name: RPC_PROBE_TIMEOUT
+          value: "180"
+        - name: RPC_PROBE_RETRIES
+          value: "5"
+      NOVA_CONDUCTOR:
+        - name: RPC_PROBE_TIMEOUT
+          value: "180"
+        - name: RPC_PROBE_RETRIES
+          value: "5"
 manifests:
   ingress_api: false
   ingress_novncproxy: false
@@ -185,14 +196,6 @@ conf:
     DEFAULT:
       debug: true
       transport_url: ""
-    oslo_messaging_rabbit:
-      rabbit_userid: nova
-      rabbit_password: telen0rtcocl0ud
-      rabbit_virtual_host: nova
-      heartbeat_timeout_threshold: 120
-      heartbeat_rate: 2
-      connection_attempts: 30
-      retry_delay: 5
   ceph:
     enabled: true
   ceph_client:

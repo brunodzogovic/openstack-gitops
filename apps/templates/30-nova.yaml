@@ -63,6 +63,19 @@ spec:
                       app.kubernetes.io/component: os-api
                       application: nova
                       component: os-api
+              - target: { kind: Deployment, name: nova-scheduler }
+                patch: |
+                  - op: remove
+                    path: /spec/template/spec/containers/0/livenessProbe
+                  - op: remove
+                    path: /spec/template/spec/containers/0/readinessProbe
+             # (optional) repeat for nova-conductor
+              - target: { kind: Deployment, name: nova-conductor }
+                patch: |
+                  - op: remove
+                    path: /spec/template/spec/containers/0/livenessProbe
+                  - op: remove
+                    path: /spec/template/spec/containers/0/readinessProbe
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values

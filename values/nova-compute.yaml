@@ -194,8 +194,10 @@ endpoints:
 conf:
   nova:
     placement:
+      region_name: RegionOne
       auth_type: password
       auth_version: v3
+      endpoint_override: http://placement-api.openstack.svc.cluster.local:8778
     DEFAULT:
       debug: true
       transport_url: ""

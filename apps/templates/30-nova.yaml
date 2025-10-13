@@ -60,9 +60,9 @@ spec:
                     value:
                       app.kubernetes.io/instance: nova
                       app.kubernetes.io/name: nova
-                      app.kubernetes.io/component: api
+                      app.kubernetes.io/component: nova-api
                       application: nova
-                      component: api
+                      component: nova-api
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values

@@ -193,6 +193,8 @@ endpoints:
 
 conf:
   nova:
+    placement:
+      region_name: RegionOne
     DEFAULT:
       debug: false
       transport_url: ""

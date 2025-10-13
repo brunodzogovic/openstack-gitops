@@ -115,6 +115,8 @@ endpoints:
     port:
       api:
         default: 8778
+        public: 80
+        service: 8778
     scheme:
       default: http
       service: http

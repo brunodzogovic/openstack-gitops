@@ -63,13 +63,14 @@ spec:
                       app.kubernetes.io/component: os-api
                       application: nova
                       component: os-api
+              # Remove the probes via postRenderer so the container isn’t killed before it opens the AMQP socket
               - target: { kind: Deployment, name: nova-scheduler }
                 patch: |
                   - op: remove
                     path: /spec/template/spec/containers/0/livenessProbe
                   - op: remove
                     path: /spec/template/spec/containers/0/readinessProbe
-             # (optional) repeat for nova-conductor
+              # (optional) repeat for nova-conductor
               - target: { kind: Deployment, name: nova-conductor }
                 patch: |
                   - op: remove

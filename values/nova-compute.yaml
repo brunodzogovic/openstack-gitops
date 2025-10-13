@@ -192,7 +192,8 @@ endpoints:
 conf:
   nova:
     placement:
-      region_name: RegionOne
+      auth_type: password
+      auth_version: v3
     DEFAULT:
       debug: true
       transport_url: ""

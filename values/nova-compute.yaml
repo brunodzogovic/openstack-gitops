@@ -123,10 +123,8 @@ endpoints:
     scheme:
       default: rabbit
     port:
-      amqp:
-        default: 5672
-      http:
-        default: 15672
+      amqp: 5672
+      http: 15672
     path:
       default: /nova
     auth:

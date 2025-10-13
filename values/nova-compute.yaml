@@ -201,3 +201,21 @@ conf:
   ceph_client:
     configmap: ceph-etc
     user_secret_name: pvc-ceph-client-key 
+  logging:
+    loggers:
+      keys: root,nova,oslo_messaging,amqp
+    logger_root:
+      level: INFO
+      handlers: stdout
+    logger_nova:
+      level: DEBUG
+      handlers: stdout
+      qualname: nova
+    logger_oslo_messaging:
+      level: INFO
+      handlers: stdout
+      qualname: oslo_messaging
+    logger_amqp:
+      level: INFO
+      handlers: stdout
+      qualname: amqp

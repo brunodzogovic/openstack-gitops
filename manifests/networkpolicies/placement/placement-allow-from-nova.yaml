@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: placement-allow-from-nova
+  namespace: openstack
+spec:
+  podSelector:
+    matchLabels:
+      application: placement
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          application: nova
+    ports:
+    - protocol: TCP
+      port: 8778

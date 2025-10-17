@@ -66,6 +66,10 @@ spec:
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
+      path: manifests
+      directory:
+        recurse: true
+        include: networkpolicies/placement/**.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions:

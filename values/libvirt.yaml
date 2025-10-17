@@ -1,0 +1,20 @@
+# values/libvirt.yaml
+labels:
+  node_selector_key: openstack-compute-node
+  node_selector_value: enabled
+
+# Optional, but nice when kube-proxy is disabled and Cilium is in BPF mode
+manifests:
+  network_policy: false
+
+pod:
+  security_context:
+    # libvirt needs extra privileges to manage qemu devices & tun/tap
+    # (defaults in the chart are usually fine; leaving here for clarity)
+    runAsUser: 0
+
+# If you want fewer logs
+conf:
+  libvirt:
+    log_filters: "1:qemu 1:libvirt"
+    log_outputs: "1:file:/var/log/libvirt/libvirtd.log"

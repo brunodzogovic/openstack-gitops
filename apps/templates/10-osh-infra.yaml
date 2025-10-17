@@ -82,4 +82,32 @@ spec:
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: osh-libvirt
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.infra }}
+  sources:
+    - repoURL: {{ .Values.repos.osh_infra }}     # opendev OSH-Infra repo
+      targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+      path: libvirt
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/libvirt.yaml          # << add this file
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions:
       - CreateNamespace=true 

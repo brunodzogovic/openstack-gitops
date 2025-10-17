@@ -196,6 +196,8 @@ conf:
     DEFAULT:
       debug: true
       transport_url: ""
+    libvirt:
+      virt_type: kvm
   ceph:
     enabled: true
   ceph_client:

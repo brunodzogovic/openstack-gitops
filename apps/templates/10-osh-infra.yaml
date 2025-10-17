@@ -87,7 +87,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: osh-libvirt
+  name: libvirt
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "10"

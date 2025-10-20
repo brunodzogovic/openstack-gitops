@@ -159,8 +159,8 @@ spec:
               echo "[0/3] Target namespaces: ${TARGET_NAMESPACES}"
 
               echo "[1/3] Building ceph.conf from rook-ceph-config"
-              MH_B64=$(kubectl -n rook-ceph get configmap rook-ceph-config -o jsonpath='{.data.mon_host}' || true)
-              MIM_B64=$(kubectl -n rook-ceph get configmap rook-ceph-config -o jsonpath='{.data.mon_initial_members}' || true)
+              MH_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_host}' || true)
+              MIM_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_initial_members}' || true)
               if [ -z "${MH_B64}" ] || [ -z "${MIM_B64}" ]; then
                 echo "ERROR: rook-ceph-config is missing mon_host/mon_initial_members"; exit 1
               fi

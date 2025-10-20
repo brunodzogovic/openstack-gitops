@@ -139,62 +139,66 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
     argocd.argoproj.io/sync-wave: "-1"
 spec:
+  backoffLimit: 3
   template:
     spec:
+      serviceAccountName: ceph-bridge
+      restartPolicy: Never
       containers:
-      - name: kubectl
-        env:
-        - name: TARGET_NAMESPACES
-          value: "openstack osh-infra"   # default: write to both
-        # image/command unchanged…
-        args:
-          - |
-            set -euo pipefail
-            echo "[0/3] Target namespaces: ${TARGET_NAMESPACES}"
+        - name: kubectl
+          image: docker.io/bitnami/kubectl:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TARGET_NAMESPACES
+              value: "openstack osh-infra"
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              set -euo pipefail
+              echo "[0/3] Target namespaces: ${TARGET_NAMESPACES}"
 
-            echo "[1/3] Building ceph.conf from rook-ceph-config"
-            MH_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_host}' || true)
-            MIM_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_initial_members}' || true)
-            if [ -z "${MH_B64}" ] || [ -z "${MIM_B64}" ]; then
-              echo "ERROR: rook-ceph-config is missing mon_host/mon_initial_members"; exit 1
-            fi
-            MON_HOST=$(printf "%s" "${MH_B64}" | base64 -d | tr -d '\r')
-            MON_MEMBERS=$(printf "%s" "${MIM_B64}" | base64 -d | tr -d ' \r\n')
-            FSID_B64=$(kubectl -n rook-ceph get secret rook-ceph-mon -o jsonpath='{.data.fsid}' 2>/dev/null || true)
-            FSID=""
-            [ -n "${FSID_B64}" ] && FSID=$(printf "%s" "${FSID_B64}" | base64 -d | tr -d '\r')
+              echo "[1/3] Building ceph.conf from rook-ceph-config"
+              MH_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_host}' || true)
+              MIM_B64=$(kubectl -n rook-ceph get secret rook-ceph-config -o jsonpath='{.data.mon_initial_members}' || true)
+              if [ -z "${MH_B64}" ] || [ -z "${MIM_B64}" ]; then
+                echo "ERROR: rook-ceph-config is missing mon_host/mon_initial_members"; exit 1
+              fi
+              MON_HOST=$(printf "%s" "${MH_B64}" | base64 -d | tr -d '\r')
+              MON_MEMBERS=$(printf "%s" "${MIM_B64}" | base64 -d | tr -d ' \r\n')
+              FSID_B64=$(kubectl -n rook-ceph get secret rook-ceph-mon -o jsonpath='{.data.fsid}' 2>/dev/null || true)
+              FSID=""
+              [ -n "${FSID_B64}" ] && FSID=$(printf "%s" "${FSID_B64}" | base64 -d | tr -d '\r')
 
-            cat >/work/ceph.conf <<EOF
-            [global]
-            mon_host = ${MON_HOST}
-            mon_initial_members = ${MON_MEMBERS}
-            EOF
-            if [ -n "${FSID}" ]; then echo "fsid = ${FSID}" >> /work/ceph.conf; fi
+              cat >/work/ceph.conf <<EOF
+              [global]
+              mon_host = ${MON_HOST}
+              mon_initial_members = ${MON_MEMBERS}
+              EOF
+              if [ -n "${FSID}" ]; then echo "fsid = ${FSID}" >> /work/ceph.conf; fi
 
-            echo "[2/3] Upsert ceph-etc ConfigMap and pvc-ceph-client-key Secret to targets"
-            KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o jsonpath='{.data.keyring}')
-            KEY_RAW=$(printf "%s" "$KEY_B64" | base64 -d | sed -n 's/^[[:space:]]*key[[:space:]]*=[[:space:]]*\(.*\)$/\1/p' | tr -d '\r')
-            if [ -z "${KEY_RAW}" ]; then
-              echo "ERROR: failed to parse admin key from rook-ceph-admin-keyring"; exit 1
-            fi
+              echo "[2/3] Upsert ceph-etc ConfigMap and pvc-ceph-client-key Secret to targets"
+              KEY_B64=$(kubectl -n rook-ceph get secret rook-ceph-admin-keyring -o jsonpath='{.data.keyring}')
+              KEY_RAW=$(printf "%s" "$KEY_B64" | base64 -d | sed -n 's/^[[:space:]]*key[[:space:]]*=[[:space:]]*\(.*\)$/\1/p' | tr -d '\r')
+              if [ -z "${KEY_RAW}" ]; then
+                echo "ERROR: failed to parse admin key from rook-ceph-admin-keyring"; exit 1
+              fi
 
-            for NS in ${TARGET_NAMESPACES}; do
-              echo "  - Namespace ${NS}: applying ceph-etc"
-              kubectl -n "${NS}" create configmap ceph-etc \
-                --from-file=ceph.conf=/work/ceph.conf \
-                --dry-run=client -o yaml | kubectl apply -f -
+              for NS in ${TARGET_NAMESPACES}; do
+                echo "  - Namespace ${NS}: applying ceph-etc"
+                kubectl -n "${NS}" create configmap ceph-etc \
+                  --from-file=ceph.conf=/work/ceph.conf \
+                  --dry-run=client -o yaml | kubectl apply -f -
 
-              echo "  - Namespace ${NS}: applying pvc-ceph-client-key"
-              kubectl -n "${NS}" create secret generic pvc-ceph-client-key \
-                --from-literal=key="${KEY_RAW}" \
-                --dry-run=client -o yaml | kubectl apply -f -
-            done
+                echo "  - Namespace ${NS}: applying pvc-ceph-client-key"
+                kubectl -n "${NS}" create secret generic pvc-ceph-client-key \
+                  --from-literal=key="${KEY_RAW}" \
+                  --dry-run=client -o yaml | kubectl apply -f -
+              done
 
-            echo "[3/3] Done."
-      volumeMounts:
-        - name: work
-          mountPath: /work
+              echo "[3/3] Done."
+          volumeMounts:
+            - name: work
+              mountPath: /work
       volumes:
         - name: work
           emptyDir: {}
-

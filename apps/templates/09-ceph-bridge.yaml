@@ -9,7 +9,7 @@ spec:
   project: {{ .Values.project }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: openstack
+    namespace: {{ .Values.namespaces.os }}
   source:
     repoURL: {{ .Values.repos.self }}
     targetRevision: {{ .Values.versions.self_ref | default "main" }}

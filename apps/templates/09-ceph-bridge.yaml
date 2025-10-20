@@ -4,7 +4,7 @@ metadata:
   name: ceph-bridge
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "6"   # earlier than libvirt & nova
+    argocd.argoproj.io/sync-wave: "9"   # earlier than libvirt & nova
 spec:
   project: {{ .Values.project }}
   destination:

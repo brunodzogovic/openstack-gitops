@@ -13,14 +13,13 @@ pod:
     # (defaults in the chart are usually fine; leaving here for clarity)
     runAsUser: 0
 
-ceph_client:
-  configmap: ceph-etc
-  user_secret_name: pvc-ceph-client-key
-
 # If you want fewer logs
 conf:
-  ceph: 
-  enabled: true
+  ceph:
+    enabled: true
+  ceph_client:
+    configmap: ceph-etc
+    user_secret_name: pvc-ceph-client-key
   libvirt:
     log_filters: "1:qemu 1:libvirt"
     log_outputs: "1:file:/var/log/libvirt/libvirtd.log"

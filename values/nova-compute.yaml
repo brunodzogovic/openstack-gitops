@@ -221,3 +221,29 @@ conf:
       level: INFO
       handlers: stdout
       qualname: amqp
+dependencies:
+  dynamic:
+    pod:
+      - type: pod
+        required: true
+        same_host: true
+        namespace: osh-infra
+        labels:
+          application: libvirt
+          component: libvirt
+      - type: pod
+        required: false
+        same_host: true
+        namespace: openstack
+        labels:
+          application: neutron
+          component: neutron-ovs-agent
+    service:
+      - type: service
+        required: false
+        namespace: openstack
+        name: glance-api
+      - type: service
+        required: false
+        namespace: openstack
+        name: neutron-server

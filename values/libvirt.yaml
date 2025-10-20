@@ -19,6 +19,8 @@ ceph_client:
 
 # If you want fewer logs
 conf:
+  ceph: 
+  enabled: true
   libvirt:
     log_filters: "1:qemu 1:libvirt"
     log_outputs: "1:file:/var/log/libvirt/libvirtd.log"

@@ -18,12 +18,13 @@ metadata:
     argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
-    resources: ["secrets","configmaps"]
-    resourceNames:
-      - rook-ceph-config
-      - rook-ceph-admin-keyring
-      - rook-ceph-mon
-    verbs: ["get","list","watch"]
+    resources: ["configmaps"]
+    resourceNames: ["rook-ceph-config"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["rook-ceph-admin-keyring","rook-ceph-mon"]
+    verbs: ["get"]
 ---
 # Writer in openstack for the targets Nova expects
 apiVersion: rbac.authorization.k8s.io/v1

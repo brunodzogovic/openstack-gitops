@@ -18,12 +18,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "-3"
 rules:
   - apiGroups: [""]
-    resources: ["configmaps"]
-    resourceNames: ["rook-ceph-config"]
-    verbs: ["get"]
-  - apiGroups: [""]
     resources: ["secrets"]
-    resourceNames: ["rook-ceph-admin-keyring","rook-ceph-mon"]
+    resourceNames: ["rook-ceph-config","rook-ceph-admin-keyring","rook-ceph-mon"]
     verbs: ["get"]
 ---
 # Writer in openstack for the targets Nova expects

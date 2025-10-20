@@ -10,13 +10,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
-  sources:
-    - repoURL: {{ .Values.repos.self }}
-      targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      path: manifests
-      directory:
-        recurse: true
-        include: ceph-bridge/**.yaml
+  sources: 
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: nova

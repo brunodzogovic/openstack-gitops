@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ceph-bridge
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"   # earlier than libvirt & nova
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openstack
+  source:
+    repoURL: {{ .Values.repos.self }}
+    targetRevision: {{ .Values.versions.self_ref | default "main" }}
+    path: manifests/ceph-bridge     # your existing directory
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

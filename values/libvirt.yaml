@@ -13,7 +13,6 @@ pod:
     # (defaults in the chart are usually fine; leaving here for clarity)
     runAsUser: 0
 
-# If you want fewer logs
 conf:
   ceph:
     enabled: true

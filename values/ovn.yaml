@@ -1,10 +1,10 @@
 # Use eth2 IP as the OVN Geneve encap IP on each node
 images:
   tags:
-    ovn_ovsdb_nb: docker.io/openstackhelm/ovn:ubuntu_focal
-    ovn_ovsdb_sb: docker.io/openstackhelm/ovn:ubuntu_focal
-    ovn_northd: docker.io/openstackhelm/ovn:ubuntu_focal
-    ovn_controller: docker.io/openstackhelm/ovn:ubuntu_focal
+    ovn_ovsdb_nb: docker.io/openstackhelm/ovn:ubuntu_jamy
+    ovn_ovsdb_sb: docker.io/openstackhelm/ovn:ubuntu_jammy
+    ovn_northd: docker.io/openstackhelm/ovn:ubuntu_jammy
+    ovn_controller: docker.io/openstackhelm/ovn:ubuntu_jammy
     ovn_controller_kubectl: docker.io/openstackhelm/ceph-config-helper:latest-ubuntu_jammy
     dep_check: quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal
     image_repo_sync: docker.io/library/docker:17.07.0

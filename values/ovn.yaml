@@ -1,20 +1,15 @@
 # Use eth2 IP as the OVN Geneve encap IP on each node
 images:
   tags:
-    # Use upstream OVN images that are built on Ubuntu 22.04 (glibc ≥ 2.35)
-    ovn_ovsdb_nb:      quay.io/ovn-org/ovn:24.03.0-ubuntu22.04
-    ovn_ovsdb_sb:      quay.io/ovn-org/ovn:24.03.0-ubuntu22.04
-    ovn_northd:        quay.io/ovn-org/ovn:24.03.0-ubuntu22.04
-    ovn_controller:    quay.io/ovn-org/ovn:24.03.0-ubuntu22.04
-
-    # All helper/entrypoint images must match the glibc era too
-    dep_check:         quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_jammy
-    db_init:           quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_jammy   # if your chart has this
+    ovn_ovsdb_nb: docker.io/openstackhelm/ovn:ubuntu_focal
+    ovn_ovsdb_sb: docker.io/openstackhelm/ovn:ubuntu_focal
+    ovn_northd: docker.io/openstackhelm/ovn:ubuntu_focal
+    ovn_controller: docker.io/openstackhelm/ovn:ubuntu_focal
     ovn_controller_kubectl: docker.io/openstackhelm/ceph-config-helper:latest-ubuntu_jammy
-
-    # keep parser/vector on a modern base (noble/debian12 are fine)
-    ovn_logging_parser: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble
-    vector:            docker.io/timberio/vector:0.39.0-debian
+    dep_check: quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal
+    image_repo_sync: docker.io/library/docker:17.07.0
+    vector: docker.io/timberio/vector:0.39.0-debian
+    ovn_logging_parser: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble 
 
 network:
   interface:

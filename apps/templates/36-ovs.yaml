@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openvswitch
+  name: ovs
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "36"   # before OVN (38)

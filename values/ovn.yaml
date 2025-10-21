@@ -1,0 +1,34 @@
+# Use eth2 IP as the OVN Geneve encap IP on each node
+network:
+  interface:
+    tunnel: eth2            # chart derives ovn-encap-ip from this
+  external:
+    bridge:
+      name: br-ex
+    interface: eth1         # enslave eth1 into br-ex for provider nets
+
+conf:
+  ovn:
+    # Bridge→physnet mapping for provider networks
+    # The infra chart will program:
+    #   - external-ids:ovn-bridge-mappings=physnet1:br-ex
+    #   - external-ids:ovn-encap-type=geneve
+    #   - external-ids:ovn-encap-ip=<IP on eth2>
+    bridge_mappings: "physnet1:br-ex"
+    bridge_interface_mappings: "br-ex:eth1"
+
+  # Optional: set MTU for Geneve overlay
+  mtu:
+    geneve: 1450
+
+manifests:
+  # Central components
+  deployment_ovn_northd: true
+  statefulset_ovn_nb_db: true
+  statefulset_ovn_sb_db: true
+  service_ovn_nb: true
+  service_ovn_sb: true
+
+  # Controllers on all (compute+controller) nodes
+  daemonset_ovn_controller: true
+

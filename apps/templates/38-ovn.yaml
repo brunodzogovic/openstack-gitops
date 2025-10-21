@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ovn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "38"  # before neutron
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.namespaces.os }}   # usually "openstack"
+  source:
+    repoURL: {{ .Values.repos.osh_infra }}    # openstack-helm-infra
+    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+    path: ovn
+    helm:
+      valueFiles:
+        - $values/values/globals.yaml
+        - $values/values/ovn.yaml
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+

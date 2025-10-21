@@ -25,9 +25,6 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/ovn.yaml
-    - repoURL: {{ .Values.repos.self }}              # your openstack-gitops repo
-      targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

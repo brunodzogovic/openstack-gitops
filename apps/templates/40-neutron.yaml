@@ -18,7 +18,7 @@ spec:
       valueFiles:
         - $values/values/globals.yaml
         - $values/values/neutron-ovn.yaml
-        - $values/values/secrets.sample.yaml
+        - $values/values/secrets.sops.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

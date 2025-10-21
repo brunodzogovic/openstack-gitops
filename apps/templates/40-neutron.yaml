@@ -11,14 +11,17 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
   source:
-    repoURL: {{ .Values.repos.osh }}
-    targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
-    path: neutron
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
-        - $values/values/neutron-ovn.yaml
-        - $values/values/secrets.sops.yaml
+    - repoURL: {{ .Values.repos.osh }}
+      targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
+      path: neutron
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/neutron-ovn.yaml
+          - $values/values/secrets.sops.yaml
+    - repoURL: {{ .Values.repos.self }}              # your openstack-gitops repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

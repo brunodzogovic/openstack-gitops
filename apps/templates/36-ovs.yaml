@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openvswitch
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "36"   # before OVN (38)
+spec:
+  project: {{ .Values.project }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: osh-infra
+  sources:
+    # Chart source (openstack-helm-infra)
+    - repoURL: {{ .Values.repos.osh_infra }}
+      targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+      path: openvswitch
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/ovs.yaml
+    # Values repo (this repo)
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

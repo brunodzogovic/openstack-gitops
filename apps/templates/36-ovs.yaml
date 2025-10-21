@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ovs
+  name: openvswitch
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "36"   # before OVN (38)
@@ -18,7 +18,7 @@ spec:
       helm:
         valueFiles:
           - $values/values/globals.yaml
-          - $values/values/ovs.yaml
+          - $values/values/openvswitch.yaml
     # Values repo (this repo)
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}

@@ -237,7 +237,7 @@ dependencies:
         namespace: openstack
         labels:
           application: neutron
-          component: neutron-ovs-agent
+          component: ovn-metadata-agent
     service:
       - type: service
         required: false

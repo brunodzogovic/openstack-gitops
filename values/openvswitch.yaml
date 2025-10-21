@@ -12,31 +12,6 @@ pod:
         - key: "node-role.kubernetes.io/control-plane"
           operator: "Exists"
           effect: "NoSchedule"
-  security_context:
-  ovs:
-    pod:
-      runAsUser: 42424
-      fsGroup: 42424
-      fsGroupChangePolicy: "OnRootMismatch"
-    container:
-      perms:
-        runAsUser: 0                    # init runs as root to chown/chmod
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-      server:
-        runAsUser: 42424                # non-root for ovsdb-server
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-      vswitchd:
-        runAsUser: 0
-        capabilities:
-          add: ["NET_ADMIN"]
-        readOnlyRootFilesystem: true
-      modules:
-        runAsUser: 0
-        capabilities:
-          add: ["SYS_MODULE","SYS_CHROOT"]
-        readOnlyRootFilesystem: true
 
 # ---- Images (use Jammy/Noble to avoid glibc mismatch) ----
 images:

@@ -8,9 +8,10 @@ labels:
 pod:
   tolerations:
     openvswitch:
-      - key: "node-role.kubernetes.io/control-plane"
-        operator: "Exists"
-        effect: "NoSchedule"
+      tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
 
 # ---- Images (use Jammy/Noble to avoid glibc mismatch) ----
 images:
@@ -19,19 +20,3 @@ images:
     openvswitch_vswitchd:  docker.io/openstackhelm/openvswitch:ubuntu_jammy
     dep_check:             quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_jammy
   pull_policy: IfNotPresent
-
-# ---- Optional: let the chart create br-ex and enslave your uplink ----
-# If you already manage br-ex yourself, leave 'interface' empty.
-network:
-  external:
-    bridge:
-      name: br-ex
-    interface: eth1         # <-- your uplink NIC for provider networks
-
-# ---- Logging (quiet but useful for the timebeing at least) ----
-conf:
-  logging:
-    logger_root:
-      level: INFO
-      handlers: stdout
-

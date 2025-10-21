@@ -11,6 +11,13 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}   # usually "openstack"
   sources:
+    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref:  values
+      path: manifests
+      directory:
+        recurse: true
+        include: ovn/**.yaml
     - repoURL: {{ .Values.repos.osh_infra }}    # openstack-helm-infra
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: ovn

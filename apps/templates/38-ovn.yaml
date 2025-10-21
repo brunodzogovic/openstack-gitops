@@ -11,13 +11,16 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}   # usually "openstack"
   source:
-    repoURL: {{ .Values.repos.osh_infra }}    # openstack-helm-infra
-    targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
-    path: ovn
-    helm:
-      valueFiles:
-        - $values/values/globals.yaml
-        - $values/values/ovn.yaml
+    - repoURL: {{ .Values.repos.osh_infra }}    # openstack-helm-infra
+      targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
+      path: ovn
+      helm:
+        valueFiles:
+          - $values/values/globals.yaml
+          - $values/values/ovn.yaml
+    - repoURL: {{ .Values.repos.self }}              # your openstack-gitops repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

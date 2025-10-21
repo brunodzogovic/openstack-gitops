@@ -10,7 +10,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
-  source:
+  sources:
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron

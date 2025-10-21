@@ -10,7 +10,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}   # usually "openstack"
-  source:
+  sources:
     - repoURL: {{ .Values.repos.osh_infra }}    # openstack-helm-infra
       targetRevision: {{ .Values.versions.osh_infra_ref | default "master" }}
       path: ovn

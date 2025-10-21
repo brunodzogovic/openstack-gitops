@@ -20,3 +20,13 @@ images:
     openvswitch_vswitchd: docker.io/openstackhelm/openvswitch:latest-ubuntu_focal
     dep_check: quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal
     image_repo_sync: docker.io/library/docker:17.07.0 
+
+security_context:
+  ovs:
+    pod:
+      runAsUser: 42424
+      fsGroup: 42424
+      fsGroupChangePolicy: OnRootMismatch
+    container:
+      perms:
+        runAsUser: 0

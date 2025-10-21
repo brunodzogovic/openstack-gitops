@@ -62,18 +62,11 @@ manifests:
   daemonset_ovn_controller: true
 
 dependencies:
-  dynamic:
-    service:
-      - type: service
-        namespace: openstack
-        name: ovn-ovsdb-sb
-        required: true
-    pod:
-      - type: pod
-        namespace: osh-infra        # <— OVS runs here
-        same_host: true
-        required: true
-        labels:
-          application: openvswitch
-          component: server         # confirm this label below
-  custom_resources: []
+  static:
+    ovn_controller:
+      pod:
+        - requireSameNode: true
+          namespace: osh-infra        # <— OVS runs here
+          labels:
+            application: openvswitch
+            component: server         # confirm this label belo

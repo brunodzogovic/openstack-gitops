@@ -1,20 +1,79 @@
+manifests:
+  job_db_init: true
+  job_db_sync: true
+  job_ks_user: true
+  job_ks_service: true
+  job_ks_endpoints: true
+  server: true
+  # In ML2/OVN there is no OVS L2 agent.
+  # You DO want the OVN metadata agent on nodes:
+  daemonset_ovn_metadata: true
+
+endpoints:
+  identity:
+    hosts: { default: keystone-api, internal: keystone-api }
+    namespace: openstack
+    port: { api: { default: 80, internal: 5000 } }
+    scheme: { default: http }
+    path: { default: /v3 }
+    auth:
+      admin:   { region_name: RegionOne, username: admin,    project_name: admin,   user_domain_name: Default, project_domain_name: Default }
+      neutron: { region_name: RegionOne, username: neutron,  project_name: service, user_domain_name: Default, project_domain_name: Default }
+      nova:    { region_name: RegionOne, username: nova_neutron, project_name: service, user_domain_name: Default, project_domain_name: Default }
+
+  oslo_messaging:
+    host_fqdn_overrides: { default: rabbitmq.osh-infra.svc.cluster.local }
+    hosts: { default: rabbitmq }
+    namespace: osh-infra
+    scheme: { default: rabbit }
+    port: { amqp: { default: 5672 }, http: { default: 15672 } }
+    path: { default: /neutron }
+    auth:
+      admin:   { username: rabbitmq }
+      neutron: { username: neutron }
+
+  oslo_db:
+    hosts: { default: mariadb }
+    namespace: osh-infra
+    scheme: mysql+pymysql
+    path: /neutron
+    port: { mysql: { default: 3306 } }
+    auth:
+      admin:   { username: root }
+      neutron: { username: neutron }
+
+# For nova-compute/neutron-ovn metadata flow
 conf:
   neutron:
     DEFAULT:
       core_plugin: ml2
       service_plugins: ovn-router
+      # dhcp_agents_per_network has no effect with OVN; DHCP is native in OVN
     ml2:
       type_drivers: "geneve,vlan,flat"
       tenant_network_types: "geneve"
       mechanism_drivers: "ovn"
+      extension_drivers: "port_security"
+    ml2_type_geneve:
+      vni_ranges: "1:10000"
+    ml2_type_flat:
+      flat_networks: "physnet1"
+    ml2_type_vlan:
+      network_vlan_ranges: "physnet1:100:200" # adjust or set "" if you don't need VLANs now
     ovn:
       ovn_nb_connection: "tcp:ovn-nb.openstack.svc.cluster.local:6641"
       ovn_sb_connection: "tcp:ovn-sb.openstack.svc.cluster.local:6642"
+      ovn_metadata_enabled: true
 
-manifests:
-  daemonset_ovn_controller: true
-
+# Tell neutron/ovn what MTU to use for overlay
 network:
   interface:
     mtu: 1450
+
+# Optional logging
+logging:
+  loggers:
+    keys: root,neutron
+  logger_root: { level: INFO, handlers: stdout }
+  logger_neutron: { level: DEBUG, handlers: stdout, qualname: neutron }
 

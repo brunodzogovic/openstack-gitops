@@ -24,6 +24,9 @@ manifests:
   # OVN path only (no legacy OVS/L3/DHCP agents)
   daemonset_ovn_metadata: true
   daemonset_openvswitch_agent: false
+  daemonset_ovs_agent: false
+  daemonset_sriov_agent: false
+  daemonset_linuxbridge_agent: false
   daemonset_l3_agent: false
   daemonset_dhcp_agent: false
   daemonset_metadata_agent: false

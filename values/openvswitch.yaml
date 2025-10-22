@@ -29,4 +29,20 @@ security_context:
       fsGroupChangePolicy: OnRootMismatch
     container:
       perms:
+        runAsUser: 0                    # init does chown/chmod
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      server:
+        runAsUser: 42424                # ovsdb-server stays non-root
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      vswitchd:
         runAsUser: 0
+        capabilities:
+          add: ["NET_ADMIN"]
+        readOnlyRootFilesystem: true
+      modules:
+        runAsUser: 0
+        capabilities:
+          add: ["SYS_MODULE","SYS_CHROOT"]
+        readOnlyRootFilesystem: true

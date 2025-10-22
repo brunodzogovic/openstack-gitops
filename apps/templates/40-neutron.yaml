@@ -22,7 +22,7 @@ spec:
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
-      path: .
+      path: values
   syncPolicy:
     automated:
       prune: true

@@ -89,6 +89,12 @@ endpoints:
       admin:   { username: root }
       neutron: { username: neutron }
 
+  oslo_cache:
+    host_fqdn_overrides: { default: memcached.osh-infra.svc.cluster.local }
+    hosts: { default: memcached }
+    namespace: osh-infra
+    port: { memcache: { default: 11211 } }
+
 ############################################
 # Neutron config (ML2/OVN)
 ############################################

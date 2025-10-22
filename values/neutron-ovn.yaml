@@ -95,6 +95,35 @@ endpoints:
     namespace: osh-infra
     port: { memcache: { default: 11211 } }
 
+dependencies:
+  static:
+    neutron_server:
+      service:
+        - endpoint: memcached
+          namespace: osh-infra
+      job:
+        - name: neutron-rabbit-init
+          namespace: openstack
+        - name: neutron-ks-user
+          namespace: openstack
+        - name: neutron-ks-endpoints
+          namespace: openstack
+        - name: neutron-db-sync
+          namespace: openstack
+    neutron_rpc_server:
+      service:
+        - endpoint: memcached
+          namespace: osh-infra
+      job:
+        - name: neutron-rabbit-init
+          namespace: openstack
+        - name: neutron-ks-user
+          namespace: openstack
+        - name: neutron-ks-endpoints
+          namespace: openstack
+        - name: neutron-db-sync
+          namespace: openstack
+
 ############################################
 # Neutron config (ML2/OVN)
 ############################################

@@ -19,9 +19,10 @@ spec:
           - $values/values/globals.yaml
           - $values/values/neutron-ovn.yaml
           - $values/values/secrets.sops.yaml
-    - repoURL: {{ .Values.repos.self }}              # your openstack-gitops repo
+    - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref: values
   syncPolicy:
-    automated: { prune: true, selfHeal: true }
-
+    automated:
+      prune: true
+      selfHeal: true

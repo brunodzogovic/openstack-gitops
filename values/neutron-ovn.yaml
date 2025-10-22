@@ -1,32 +1,74 @@
+############################################
+# Images — keep everything on Jammy
+############################################
+images:
+  tags:
+    neutron_server:       docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
+    neutron_db_sync:      docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
+    neutron_ovn_metadata: docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
+
+############################################
+# What to deploy
+############################################
 manifests:
   job_db_init: true
   job_db_sync: true
   job_ks_user: true
   job_ks_service: true
   job_ks_endpoints: true
-  server: true
-  # In ML2/OVN there is no OVS L2 agent.
-  # You DO want the OVN metadata agent on nodes:
-  daemonset_ovn_metadata: true
 
+  # Neutron server (Deployment + Service)
+  deployment_server: true
+  service_server: true
+
+  # OVN path only (no legacy OVS/L3/DHCP agents)
+  daemonset_ovn_metadata: true
+  daemonset_openvswitch_agent: false
+  daemonset_l3_agent: false
+  daemonset_dhcp_agent: false
+  daemonset_metadata_agent: false
+
+############################################
+# Service endpoints (Keystone / Rabbit / DB)
+############################################
 endpoints:
   identity:
     hosts: { default: keystone-api, internal: keystone-api }
     namespace: openstack
-    port: { api: { default: 80, internal: 5000 } }
     scheme: { default: http }
+    port:
+      api:
+        default: 80
+        internal: 5000
     path: { default: /v3 }
     auth:
-      admin:   { region_name: RegionOne, username: admin,    project_name: admin,   user_domain_name: Default, project_domain_name: Default }
-      neutron: { region_name: RegionOne, username: neutron,  project_name: service, user_domain_name: Default, project_domain_name: Default }
-      nova:    { region_name: RegionOne, username: nova_neutron, project_name: service, user_domain_name: Default, project_domain_name: Default }
+      admin:
+        region_name: RegionOne
+        username: admin
+        project_name: admin
+        user_domain_name: Default
+        project_domain_name: Default
+      neutron:
+        region_name: RegionOne
+        username: neutron
+        project_name: service
+        user_domain_name: Default
+        project_domain_name: Default
+      nova:
+        region_name: RegionOne
+        username: nova_neutron
+        project_name: service
+        user_domain_name: Default
+        project_domain_name: Default
 
   oslo_messaging:
     host_fqdn_overrides: { default: rabbitmq.osh-infra.svc.cluster.local }
     hosts: { default: rabbitmq }
     namespace: osh-infra
     scheme: { default: rabbit }
-    port: { amqp: { default: 5672 }, http: { default: 15672 } }
+    port:
+      amqp: { default: 5672 }
+      http: { default: 15672 }
     path: { default: /neutron }
     auth:
       admin:   { username: rabbitmq }
@@ -37,43 +79,68 @@ endpoints:
     namespace: osh-infra
     scheme: mysql+pymysql
     path: /neutron
-    port: { mysql: { default: 3306 } }
+    port:
+      mysql: { default: 3306 }
     auth:
       admin:   { username: root }
       neutron: { username: neutron }
 
-# For nova-compute/neutron-ovn metadata flow
+############################################
+# Neutron config (ML2/OVN)
+############################################
 conf:
   neutron:
     DEFAULT:
       core_plugin: ml2
       service_plugins: ovn-router
-      # dhcp_agents_per_network has no effect with OVN; DHCP is native in OVN
+      # OVN provides native DHCP; dhcp_agents_per_network not used.
+      global_physnet_mtu: 1500
     ml2:
-      type_drivers: "geneve,vlan,flat"
-      tenant_network_types: "geneve"
-      mechanism_drivers: "ovn"
-      extension_drivers: "port_security"
+      mechanism_drivers: ovn
+      type_drivers: geneve,flat,vlan
+      tenant_network_types: geneve
+      extension_drivers: port_security
     ml2_type_geneve:
-      vni_ranges: "1:10000"
+      vni_ranges: 1:10000
     ml2_type_flat:
-      flat_networks: "physnet1"
+      flat_networks: physnet1
     ml2_type_vlan:
-      network_vlan_ranges: "physnet1:100:200" # adjust or set "" if you don't need VLANs now
+      network_vlan_ranges: physnet1:100:200
     ovn:
-      ovn_nb_connection: "tcp:ovn-nb.openstack.svc.cluster.local:6641"
-      ovn_sb_connection: "tcp:ovn-sb.openstack.svc.cluster.local:6642"
+      # *** IMPORTANT: use the OVN service names you deployed ***
+      ovn_nb_connection: tcp:ovn-ovsdb-nb.openstack.svc.cluster.local:6641
+      ovn_sb_connection: tcp:ovn-ovsdb-sb.openstack.svc.cluster.local:6642
       ovn_metadata_enabled: true
+    oslo_concurrency:
+      lock_path: /var/lib/neutron/tmp
 
-# Tell neutron/ovn what MTU to use for overlay
-network:
-  interface:
-    mtu: 1450
+  # OVN metadata agent bits (OSH wires most via secrets; include only what you need to override)
+  metadata_agent:
+    DEFAULT:
+      # OSH usually provides nova-metadata service for this
+      nova_metadata_host: nova-metadata
+      # If your secrets file defines the shared secret, you can omit this here.
+      # metadata_proxy_shared_secret: <referenced by secrets.sops.yaml>
 
-# Optional logging
+############################################
+# Provider bridge mapping (aligns with your OVN/OVS external-ids)
+############################################
+plugins:
+  ml2_conf:
+    ovn:
+      bridge_mappings: "physnet1:br-ex"
+
+############################################
+# Logging (optional)
+############################################
 logging:
   loggers:
     keys: root,neutron
-  logger_root: { level: INFO, handlers: stdout }
-  logger_neutron: { level: DEBUG, handlers: stdout, qualname: neutron }
+  logger_root:
+    level: INFO
+    handlers: stdout
+  logger_neutron:
+    level: DEBUG
+    handlers: stdout
+    qualname: neutron
 

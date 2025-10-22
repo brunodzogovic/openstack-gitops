@@ -16,6 +16,7 @@ manifests:
   job_ks_user: true
   job_ks_service: true
   job_ks_endpoints: true
+  job_rabbit_init: true
 
   # Neutron server (Deployment + Service)
   deployment_server: true

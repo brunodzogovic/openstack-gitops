@@ -36,6 +36,27 @@ labels:
     node_selector_key: l3-agent
     node_selector_value: enabled
 
+# ovn-values-override.yaml
+pod:
+  security_context:
+    ovn_controller:
+      container:
+        controller_init:
+          readOnlyRootFilesystem: false
+        controller:
+          readOnlyRootFilesystem: false
+
+# make discovery explicit to dodge kubectl quirks
+env:
+  - name: OVN_NB_DB_SERVICE_HOST
+    value: "ovn-ovsdb-nb.openstack.svc.cluster.local"
+  - name: OVN_NB_DB_SERVICE_PORT_OVN_NB_DB
+    value: "6641"
+  - name: OVN_SB_DB_SERVICE_HOST
+    value: "ovn-ovsdb-sb.openstack.svc.cluster.local"
+  - name: OVN_SB_DB_SERVICE_PORT_OVN_SB_DB
+    value: "6642"
+
 conf:
   ovn:
     # Bridge→physnet mapping for provider networks

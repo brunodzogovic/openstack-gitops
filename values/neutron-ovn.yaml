@@ -15,6 +15,7 @@ manifests:
   deployment_server: true
   deployment_rpc_server: true
   service_server: true
+  ingress_server: false
 
   # OVN only (no legacy agents)
   daemonset_ovn_metadata: true

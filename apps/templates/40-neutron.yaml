@@ -90,5 +90,6 @@ spec:
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
+      path: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }

@@ -11,9 +11,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
   sources:
-    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
-      targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      ref:  values
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron
@@ -90,5 +87,8 @@ spec:
                     value: BeforeHookCreation
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook
+    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref:  values
   syncPolicy:
     automated: { prune: true, selfHeal: true }

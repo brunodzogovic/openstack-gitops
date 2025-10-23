@@ -26,8 +26,11 @@ conf:
     DEFAULT:
       core_plugin: ml2
       # IMPORTANT for OVN:
-      service_plugins: networking_ovn.l3.l3_ovn.OVNL3RouterPlugin
-      global_physnet_mtu: 1500
+      service_plugins: 
+        networking_ovn: 
+          l3:
+            l3_ovn: OVNL3RouterPlugin
+  plugins:
     ml2:
       mechanism_drivers: ovn
       type_drivers: geneve,flat,vlan
@@ -39,22 +42,7 @@ conf:
       flat_networks: physnet1
     ml2_type_vlan:
       network_vlan_ranges: physnet1:100:200
-    ovn:
-      ovn_metadata_enabled: true
-    oslo_concurrency:
-      lock_path: /var/lib/neutron/tmp
-
-  # EXACT path the chart reads in its OVN init script:
-  plugins:
-    ml2_conf:
-      ml2:
-        mechanism_driver: ovn
-      ovn:
-        # Chart replaces these placeholders with the NB/SB Service ClusterIPs/ports
-        ovn_nb_connection: "tcp:__OVN_NB_DB_SERVICE_HOST__:__OVN_NB_DB_SERVICE_PORT__"
-        ovn_sb_connection: "tcp:__OVN_SB_DB_SERVICE_HOST__:__OVN_SB_DB_SERVICE_PORT__"
-        bridge_mappings: "physnet1:br-ex"
-
+ 
 dependencies:
   static:
     neutron_server:

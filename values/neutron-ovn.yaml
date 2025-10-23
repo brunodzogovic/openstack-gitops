@@ -113,6 +113,9 @@ endpoints:
     namespace: osh-infra
     port: { memcache: { default: 11211 } }
 
+bootstrap:
+  enabled: true
+
 dependencies:
   static:
     neutron_server:

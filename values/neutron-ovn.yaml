@@ -39,25 +39,7 @@ conf:
       flat_networks: physnet1
     ml2_type_vlan:
       network_vlan_ranges: physnet1:100:200
-endpoints:
-  identity:
-    hosts: 
-      default: keystone-api
-    namespace: openstack
-    port:
-      api:
-        default: 5000
-    path:
-      default: /v3
-    scheme:
-      default: http
-    auth:
-      neutron:
-        username: neutron
-        project_name: service
-        user_domain_name: Default
-        project_domain_name: Default
-
+endpoints: 
   oslo_messaging:
     host_fqdn_overrides:
       default: rabbitmq.osh-infra.svc.cluster.local

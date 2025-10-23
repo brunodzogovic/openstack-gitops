@@ -4,6 +4,7 @@ network:
     - openvswitch
 
 manifests:
+  job_bootstrap: true
   job_db_init: true
   job_db_sync: true
   job_ks_user: true
@@ -12,16 +13,61 @@ manifests:
   job_rabbit_init: true
 
   deployment_server: true
+  deployment_rpc_server: true
   service_server: true
 
   # OVN only (no legacy agents)
   daemonset_ovn_metadata: true
-  daemonset_openvswitch_agent: false
+  daemonset_ovs_agent: false
   daemonset_linuxbridge_agent: false
   daemonset_sriov_agent: false
   daemonset_dhcp_agent: false
   daemonset_l3_agent: false
   daemonset_metadata_agent: false
+
+labels:
+  agent:
+    dhcp:
+      node_selector_key: openstack-control-plane
+      node_selector_value: enabled
+    l3:
+      node_selector_key: openstack-control-plane
+      node_selector_value: enabled
+    metadata:
+      node_selector_key: openstack-control-plane
+      node_selector_value: enabled
+    l2gw:
+      node_selector_key: openstack-control-plane
+      node_selector_value: enabled
+    ovn_vpn:
+      node_selector_key: openstack-control-plane
+      node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  lb:
+    node_selector_key: linuxbridge
+    node_selector_value: enabled
+  ovs:
+    node_selector_key: openvswitch
+    node_selector_value: enabled
+  sriov:
+    node_selector_key: sriov
+    node_selector_value: enabled
+  bagpipe_bgp:
+    node_selector_key: openstack-compute-node
+    node_selector_value: enabled
+  bgp_dragent:
+    node_selector_key: openstack-compute-node
+    node_selector_value: enabled
+
+jobs:
+  ovn_db_sync:
+    cron: "*/5 * * * *"
+    sync_mode: log
+    history:
+      success: 3
+      failed: 1
 
 conf:
   neutron:

@@ -11,11 +11,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
   sources:
-    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
+    - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
-      path: values
-      recurse: true
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron

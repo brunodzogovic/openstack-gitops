@@ -29,7 +29,10 @@ conf:
   neutron:
     DEFAULT:
       core_plugin: ml2
-      service_plugins: ovn-router
+      service_plugins:
+        networking_ovn:
+          l3:
+            l3_ovn: OVNL3RouterPlugin
       global_physnet_mtu: 1500
     ml2:
       mechanism_drivers: ovn

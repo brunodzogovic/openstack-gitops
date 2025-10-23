@@ -86,6 +86,9 @@ spec:
                     value: BeforeHookCreation
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook
+    - repoURL: {{ .Values.repos.self }}      # your GitOps repo
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref:  values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

@@ -1,4 +1,6 @@
 # Keep a supported backend here; OVN is driven by ML2 + ovn options
+helm3_hook: false
+
 network:
   backend:
     - openvswitch

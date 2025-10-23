@@ -12,7 +12,6 @@ manifests:
   service_server: true
   ingress_server: false
 
-  # OVN only (no legacy agents)
   daemonset_ovn_metadata: true
   daemonset_ovs_agent: false
   daemonset_linuxbridge_agent: false
@@ -25,7 +24,6 @@ conf:
   neutron:
     DEFAULT:
       core_plugin: ml2
-      # IMPORTANT for OVN:
       service_plugins: ovn-router
   plugins:
     ml2:
@@ -39,16 +37,71 @@ conf:
       flat_networks: physnet1
     ml2_type_vlan:
       network_vlan_ranges: physnet1:100:200
-endpoints: 
+
+endpoints:
+  identity:
+    name: keystone
+    hosts:
+      default: keystone
+      internal: keystone-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 80
+        internal: 5000
+    auth:
+      neutron:
+        # keep password ONLY in secrets.sops.yaml
+        role: admin,service
+        region_name: RegionOne
+        username: neutron
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+
   oslo_messaging:
     hosts:
       default: rabbitmq
+    host_fqdn_override:
+      default: null
+    path:
+      default: /neutron
+    scheme:
+      default: rabbit
+    port:
+      amqp:
+        default: 5672
+    auth:
+      admin:
+        username: rabbitmq
+      neutron:
+        username: neutron
     namespace: osh-infra
+
   oslo_db:
     hosts:
       default: mariadb
+    host_fqdn_override:
+      default: null
+    path:
+      default: /neutron
+    scheme:
+      default: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+    auth:
+      admin:
+        username: root
+      neutron:
+        username: neutron
     namespace: osh-infra
-  
+
 dependencies:
   static:
     neutron_server:

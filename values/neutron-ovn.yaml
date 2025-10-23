@@ -11,6 +11,7 @@ images:
 # What to deploy
 ############################################
 manifests:
+  job_bootstrap: true
   job_db_init: true
   job_db_sync: true
   job_ks_user: true
@@ -31,6 +32,9 @@ manifests:
   daemonset_l3_agent: false
   daemonset_dhcp_agent: false
   daemonset_metadata_agent: false
+  daemonset_lb_agent: false
+  daemonset_bgp_dragent: false
+  daemonset_ovn_vpn_agent: false
 
 ############################################
 # Service endpoints (Keystone / Rabbit / DB)

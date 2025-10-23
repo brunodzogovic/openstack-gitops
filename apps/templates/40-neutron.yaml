@@ -15,12 +15,13 @@ spec:
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
       path: values
+      recurse: true
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron
       helm:
         valueFiles:
-          - $values/values/neutron-ovn.yaml   # ensure this is LAST so it wins!
+          - $values/values/neutron-ovn.yaml
           - $values/values/secrets/secrets.sops.yaml
         postRenderer:
           kustomize:

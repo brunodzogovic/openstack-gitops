@@ -42,6 +42,9 @@ labels:
     ovn_vpn:
       node_selector_key: openstack-control-plane
       node_selector_value: enabled
+    ovn_metadata:
+      node_selector_key: openstack-compute-node
+      node_selector_value: enabled
   job:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
@@ -60,14 +63,6 @@ labels:
   bgp_dragent:
     node_selector_key: openstack-compute-node
     node_selector_value: enabled
-
-jobs:
-  ovn_db_sync:
-    cron: "*/5 * * * *"
-    sync_mode: log
-    history:
-      success: 3
-      failed: 1
 
 conf:
   neutron:

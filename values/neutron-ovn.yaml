@@ -148,6 +148,10 @@ dependencies:
 ############################################
 # Neutron config (ML2/OVN)
 ############################################
+network:
+  backend:
+    - ovn
+
 conf:
   neutron:
     DEFAULT:

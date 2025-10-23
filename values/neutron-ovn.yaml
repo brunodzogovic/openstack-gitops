@@ -95,6 +95,8 @@ conf:
   # EXACT path the chart reads in its OVN init script:
   plugins:
     ml2_conf:
+      ml2:
+        mechanism_driver: ovn
       ovn:
         # Chart replaces these placeholders with the NB/SB Service ClusterIPs/ports
         ovn_nb_connection: "tcp:__OVN_NB_DB_SERVICE_HOST__:__OVN_NB_DB_SERVICE_PORT__"

@@ -55,6 +55,12 @@ endpoints:
         default: 80
         internal: 5000
     auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
       neutron:
         # keep password ONLY in secrets.sops.yaml
         role: admin,service

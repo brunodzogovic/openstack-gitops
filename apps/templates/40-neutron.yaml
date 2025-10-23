@@ -21,6 +21,6 @@ spec:
           - $values/values/secrets/secrets.sops.yaml 
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      ref:  values
+      ref: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }

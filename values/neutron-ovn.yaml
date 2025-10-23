@@ -1,28 +1,42 @@
-############################################
-# Images — keep everything on Jammy
-############################################
+
 images:
   tags:
-    neutron_server:       docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
-    neutron_db_sync:      docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
-    neutron_ovn_metadata: docker.io/openstackhelm/neutron:2025.1-ubuntu_jammy
+    bootstrap: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    test: docker.io/xrally/xrally-openstack:2.0.0
+    purge_test: docker.io/openstackhelm/ospurge:latest
+    db_init: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    neutron_db_sync: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    db_drop: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    rabbit_init: docker.io/rabbitmq:3.13-management
+    ks_user: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    ks_service: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    ks_endpoints: quay.io/airshipit/heat:2025.1-ubuntu_noble
+    netoffload: ghcr.io/vexxhost/netoffload:v1.0.1
+    neutron_server: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_rpc_server: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_dhcp: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_metadata: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_ovn_metadata: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_ovn_db_sync: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble
+    neutron_ovn_vpn: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_l3: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_l2gw: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_openvswitch_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_linuxbridge_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_sriov_agent: quay.io/airshipit/neutron:stein-18.04-sriov
+    neutron_sriov_agent_init: quay.io/airshipit/neutron:stein-18.04-sriov
+    neutron_bagpipe_bgp: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_bgp_dragent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_ironic_agent_init: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble
+    neutron_ironic_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    neutron_netns_cleanup_cron: quay.io/airshipit/neutron:2025.1-ubuntu_noble
+    dep_check: quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal
+    image_repo_sync: docker.io/docker:17.07.0
 
 ############################################
 # What to deploy
 ############################################
 manifests:
-  job_bootstrap: true
-  job_db_init: true
-  job_db_sync: true
-  job_ks_user: true
-  job_ks_service: true
-  job_ks_endpoints: true
-  job_rabbit_init: true
-
-  # Neutron server (Deployment + Service)
-  deployment_server: true
-  service_server: true
-
   # OVN path only (no legacy OVS/L3/DHCP agents)
   daemonset_ovn_metadata: true
   daemonset_openvswitch_agent: false

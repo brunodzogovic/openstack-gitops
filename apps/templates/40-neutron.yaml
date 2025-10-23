@@ -17,7 +17,7 @@ spec:
       helm:
         valueFiles:
           - $values/values/globals.yaml
-          - $values/values/neutron-ovn.yaml   # ensure this is LAST so it wins!
+          - $values/values/neutron-ovn.yaml
           - $values/values/secrets/secrets.sops.yaml
         postRenderer:
           kustomize:
@@ -90,6 +90,5 @@ spec:
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
-      path: values
   syncPolicy:
     automated: { prune: true, selfHeal: true }

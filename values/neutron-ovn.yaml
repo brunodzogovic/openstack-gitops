@@ -1,163 +1,35 @@
+# 1) Keep a supported backend here (OVN is not a valid value)
+network:
+  backend:
+    - openvswitch
 
-images:
-  tags:
-    bootstrap: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    test: docker.io/xrally/xrally-openstack:2.0.0
-    purge_test: docker.io/openstackhelm/ospurge:latest
-    db_init: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    neutron_db_sync: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    db_drop: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    rabbit_init: docker.io/rabbitmq:3.13-management
-    ks_user: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    ks_service: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    ks_endpoints: quay.io/airshipit/heat:2025.1-ubuntu_noble
-    netoffload: ghcr.io/vexxhost/netoffload:v1.0.1
-    neutron_server: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_rpc_server: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_dhcp: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_metadata: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_ovn_metadata: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_ovn_db_sync: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble
-    neutron_ovn_vpn: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_l3: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_l2gw: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_openvswitch_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_linuxbridge_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_sriov_agent: quay.io/airshipit/neutron:stein-18.04-sriov
-    neutron_sriov_agent_init: quay.io/airshipit/neutron:stein-18.04-sriov
-    neutron_bagpipe_bgp: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_bgp_dragent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_ironic_agent_init: docker.io/openstackhelm/neutron:2025.1-ubuntu_noble
-    neutron_ironic_agent: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    neutron_netns_cleanup_cron: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-    dep_check: quay.io/airshipit/kubernetes-entrypoint:latest-ubuntu_focal
-    image_repo_sync: docker.io/docker:17.07.0
-
-############################################
-# What to deploy
-############################################
+# 2) Ensure the init Jobs and components you need are rendered
 manifests:
+  job_db_init: true
+  job_db_sync: true
+  job_ks_user: true
+  job_ks_service: true
+  job_ks_endpoints: true
+  job_rabbit_init: true
+
+  deployment_server: true
+  service_server: true
+
   # OVN path only (no legacy OVS/L3/DHCP agents)
   daemonset_ovn_metadata: true
   daemonset_openvswitch_agent: false
-  daemonset_ovs_agent: false
-  daemonset_sriov_agent: false
   daemonset_linuxbridge_agent: false
-  daemonset_l3_agent: false
+  daemonset_sriov_agent: false
   daemonset_dhcp_agent: false
+  daemonset_l3_agent: false
   daemonset_metadata_agent: false
-  daemonset_lb_agent: false
-  daemonset_bgp_dragent: false
-  daemonset_ovn_vpn_agent: false
 
-############################################
-# Service endpoints (Keystone / Rabbit / DB)
-############################################
-endpoints:
-  identity:
-    hosts: { default: keystone-api, internal: keystone-api }
-    namespace: openstack
-    scheme: { default: http }
-    port:
-      api:
-        default: 80
-        internal: 5000
-    path: { default: /v3 }
-    auth:
-      admin:
-        region_name: RegionOne
-        username: admin
-        project_name: admin
-        user_domain_name: Default
-        project_domain_name: Default
-      neutron:
-        region_name: RegionOne
-        username: neutron
-        project_name: service
-        user_domain_name: Default
-        project_domain_name: Default
-      nova:
-        region_name: RegionOne
-        username: nova_neutron
-        project_name: service
-        user_domain_name: Default
-        project_domain_name: Default
-
-  oslo_messaging:
-    host_fqdn_overrides: { default: rabbitmq.osh-infra.svc.cluster.local }
-    hosts: { default: rabbitmq }
-    namespace: osh-infra
-    scheme: { default: rabbit }
-    port:
-      amqp: { default: 5672 }
-      http: { default: 15672 }
-    path: { default: /neutron }
-    auth:
-      admin:   { username: rabbitmq }
-      neutron: { username: neutron }
-
-  oslo_db:
-    hosts: { default: mariadb }
-    namespace: osh-infra
-    scheme: mysql+pymysql
-    path: /neutron
-    port:
-      mysql: { default: 3306 }
-    auth:
-      admin:   { username: root }
-      neutron: { username: neutron }
-
-  oslo_cache:
-    host_fqdn_overrides: { default: memcached.osh-infra.svc.cluster.local }
-    hosts: { default: memcached }
-    namespace: osh-infra
-    port: { memcache: { default: 11211 } }
-
-bootstrap:
-  enabled: true
-
-dependencies:
-  static:
-    neutron_server:
-      service:
-        - endpoint: memcached
-          namespace: osh-infra
-      job:
-        - name: neutron-rabbit-init
-          namespace: openstack
-        - name: neutron-ks-user
-          namespace: openstack
-        - name: neutron-ks-endpoints
-          namespace: openstack
-        - name: neutron-db-sync
-          namespace: openstack
-    neutron_rpc_server:
-      service:
-        - endpoint: memcached
-          namespace: osh-infra
-      job:
-        - name: neutron-rabbit-init
-          namespace: openstack
-        - name: neutron-ks-user
-          namespace: openstack
-        - name: neutron-ks-endpoints
-          namespace: openstack
-        - name: neutron-db-sync
-          namespace: openstack
-
-############################################
-# Neutron config (ML2/OVN)
-############################################
-network:
-  backend:
-    - ovn
-
+# 3) Neutron config (ML2/OVN)
 conf:
   neutron:
     DEFAULT:
       core_plugin: ml2
       service_plugins: ovn-router
-      # OVN provides native DHCP; dhcp_agents_per_network not used.
       global_physnet_mtu: 1500
     ml2:
       mechanism_drivers: ovn
@@ -171,40 +43,81 @@ conf:
     ml2_type_vlan:
       network_vlan_ranges: physnet1:100:200
     ovn:
-      # *** IMPORTANT: use the OVN service names you deployed ***
-      ovn_nb_connection: tcp:ovn-ovsdb-nb.openstack.svc.cluster.local:6641
-      ovn_sb_connection: tcp:ovn-ovsdb-sb.openstack.svc.cluster.local:6642
       ovn_metadata_enabled: true
     oslo_concurrency:
       lock_path: /var/lib/neutron/tmp
 
-  # OVN metadata agent bits (OSH wires most via secrets; include only what you need to override)
-  metadata_agent:
-    DEFAULT:
-      # OSH usually provides nova-metadata service for this
-      nova_metadata_host: nova-metadata
-      # If your secrets file defines the shared secret, you can omit this here.
-      # metadata_proxy_shared_secret: <referenced by secrets.sops.yaml>
+  # IMPORTANT: this is the exact path the template reads:
+  # .Values.conf.plugins.ml2_conf.ovn.{ovn_nb_connection, ovn_sb_connection, bridge_mappings}
+  plugins:
+    ml2_conf:
+      ovn:
+        # Use placeholders; the chart’s init script replaces them with ClusterIPs
+        # because Neutron does not accept DNS names here.
+        ovn_nb_connection: "tcp:__OVN_NB_DB_SERVICE_HOST__:__OVN_NB_DB_SERVICE_PORT__"
+        ovn_sb_connection: "tcp:__OVN_SB_DB_SERVICE_HOST__:__OVN_SB_DB_SERVICE_PORT__"
+        bridge_mappings: "physnet1:br-ex"
 
-############################################
-# Provider bridge mapping (aligns with your OVN/OVS external-ids)
-############################################
-plugins:
-  ml2_conf:
-    ovn:
-      bridge_mappings: "physnet1:br-ex"
+# 4) Endpoints must be at the TOP LEVEL (not under a 'neutron:' key)
+endpoints:
+  identity:
+    hosts: { default: keystone-api, internal: keystone-api }
+    namespace: openstack
+    scheme: { default: http }
+    port:
+      api: { default: 80, internal: 5000 }
+    path: { default: /v3 }
+    auth:
+      admin:   { region_name: RegionOne, username: admin,        project_name: admin,   user_domain_name: Default, project_domain_name: Default }
+      neutron: { region_name: RegionOne, username: neutron,      project_name: service, user_domain_name: Default, project_domain_name: Default }
+      nova:    { region_name: RegionOne, username: nova_neutron, project_name: service, user_domain_name: Default, project_domain_name: Default }
 
-############################################
-# Logging (optional)
-############################################
-logging:
-  loggers:
-    keys: root,neutron
-  logger_root:
-    level: INFO
-    handlers: stdout
-  logger_neutron:
-    level: DEBUG
-    handlers: stdout
-    qualname: neutron
+  oslo_db:
+    hosts: { default: mariadb }
+    namespace: osh-infra
+    scheme: mysql+pymysql
+    path: /neutron
+    port: { mysql: { default: 3306 } }
+    auth:
+      admin:   { username: root }
+      neutron: { username: neutron }
 
+  oslo_messaging:
+    host_fqdn_overrides: { default: rabbitmq.osh-infra.svc.cluster.local }
+    hosts: { default: rabbitmq }
+    namespace: osh-infra
+    scheme: rabbit
+    path: /neutron
+    port:
+      amqp: { default: 5672 }
+      http: { default: 15672 }
+    auth:
+      admin:   { username: rabbitmq }
+      neutron: { username: neutron }
+
+  oslo_cache:
+    host_fqdn_overrides: { default: memcached.osh-infra.svc.cluster.local }
+    hosts: { default: memcached }
+    namespace: osh-infra
+    port:
+      memcache: { default: 11211 }
+
+# 5) (Optional) Entrypoint deps that point to osh-infra for memcached
+dependencies:
+  static:
+    neutron_server:
+      service:
+        - { endpoint: memcached, namespace: osh-infra }
+      job:
+        - { name: neutron-ks-user,      namespace: openstack }
+        - { name: neutron-ks-endpoints, namespace: openstack }
+        - { name: neutron-db-sync,      namespace: openstack }
+        - { name: neutron-rabbit-init,  namespace: openstack }
+    neutron_rpc_server:
+      service:
+        - { endpoint: memcached, namespace: osh-infra }
+      job:
+        - { name: neutron-ks-user,      namespace: openstack }
+        - { name: neutron-ks-endpoints, namespace: openstack }
+        - { name: neutron-db-sync,      namespace: openstack }
+        - { name: neutron-rabbit-init,  namespace: openstack }

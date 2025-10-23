@@ -45,7 +45,7 @@ endpoints:
     namespace: openstack
     port: { api: { default: 5000 } }
     path: { default: /v3 }
-    scheme: http
+    scheme: { default: http }
     auth:
       neutron:
         username: neutron
@@ -68,8 +68,8 @@ endpoints:
   oslo_db:
     hosts: { default: mariadb }
     namespace: osh-infra
-    scheme: mysql+pymysql
-    path: /neutron
+    scheme: { default: mysql+pymysql }
+    path: { default: /neutron }
     port: { mysql: { default: 3306 } }
     auth:
       admin:   { username: root }

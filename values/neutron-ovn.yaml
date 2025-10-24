@@ -46,7 +46,7 @@ conf:
       ovn:
         ovn_nb_connection: tcp://ovn-ovsdb-nb:6641
         ovn_sb_connection: tcp://ovn-ovsdb-sb:6642
-        neutron_sync_mode: repai
+        neutron_sync_mode: repair
 
 endpoints:
   identity:

@@ -33,7 +33,39 @@ spec:
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook-weight
                   - op: remove
-                    path: /metadata/annotations/helm.sh~1hook-delete-policy 
+                    path: /metadata/annotations/helm.sh~1hook-delete-policy
+              - target:
+                  kind: Deployment
+                  name: neutron-server
+                patch: |
+                  - op: add
+                    path: /spec/template/spec/volumes/-
+                    value:
+                      name: neutron-ovn-conn
+                      configMap:
+                        name: neutron-ovn-conn
+                  - op: add
+                    path: /spec/template/spec/containers/0/volumeMounts/-
+                    value:
+                      name: neutron-ovn-conn
+                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.d/99-ovn-conn.ini
+                      subPath: 99-ovn-conn.ini
+              - target:
+                  kind: Deployment
+                  name: neutron-rpc-server
+                patch: |
+                  - op: add
+                    path: /spec/template/spec/volumes/-
+                    value:
+                      name: neutron-ovn-conn
+                      configMap:
+                        name: neutron-ovn-conn
+                  - op: add
+                    path: /spec/template/spec/containers/0/volumeMounts/-
+                    value:
+                      name: neutron-ovn-conn
+                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.d/99-ovn-conn.ini
+                      subPath: 99-ovn-conn.ini
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values

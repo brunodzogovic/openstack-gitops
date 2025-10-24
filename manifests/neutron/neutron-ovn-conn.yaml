@@ -125,4 +125,3 @@ spec:
       volumes:
         - name: work
           emptyDir: {}
-

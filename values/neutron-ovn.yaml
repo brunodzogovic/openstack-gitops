@@ -169,6 +169,21 @@ endpoints:
       novncproxy:
         default: 6080
 
+  compute_metadata:
+    name: nova
+    hosts:
+      default: nova-metadata
+      public: metadata
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      metadata:
+        default: 8775
+        public: 80
 
 dependencies:
   static:

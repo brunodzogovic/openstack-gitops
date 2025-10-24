@@ -11,9 +11,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
   sources:
-    - repoURL: {{ .Values.repos.self }}
-      targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      ref:  values
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron
@@ -37,6 +34,9 @@ spec:
                     path: /metadata/annotations/helm.sh~1hook-weight
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook-delete-policy 
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref:  values
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

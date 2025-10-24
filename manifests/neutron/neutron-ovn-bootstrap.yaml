@@ -1,0 +1,152 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openstack
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: neutron-ml2-ovn-writer
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: neutron-ml2-ovn-writer
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get","list","watch","create","update","patch"]
+  - apiGroups: [""]
+    resources: ["services","endpoints"]
+    verbs: ["get","list","watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: neutron-ml2-ovn-writer
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+subjects:
+  - kind: ServiceAccount
+    name: neutron-ml2-ovn-writer
+    namespace: openstack
+roleRef:
+  kind: Role
+  name: neutron-ml2-ovn-writer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: neutron-ml2-ovn-cm-bootstrap
+  namespace: openstack
+  annotations:
+    # run before neutron (your neutron app uses sync-wave "40")
+    argocd.argoproj.io/sync-wave: "35"
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      serviceAccountName: neutron-ml2-ovn-writer
+      restartPolicy: OnFailure
+      containers:
+        - name: cm-writer
+          # kubectl + getent + nc
+          image: bitnami/kubectl:1.30
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              set -euo pipefail
+              echo "[info] resolving OVN NB/SB IPv4 addresses…"
+              # Resolve single IPv4 (first A record)
+              NB_IP="$(getent ahostsv4 ovn-ovsdb-nb | awk '{print $1; exit}')"
+              SB_IP="$(getent ahostsv4 ovn-ovsdb-sb | awk '{print $1; exit}')"
+              if [ -z "${NB_IP:-}" ] || [ -z "${SB_IP:-}" ]; then
+                echo "[error] could not resolve ovn-ovsdb-nb/sb" >&2; exit 1
+              fi
+
+              # Wait for TCP reachability (max 180s each)
+              echo "[info] waiting for ${NB_IP}:6641 and ${SB_IP}:6642…"
+              i=0; until nc -z -w 1 "$NB_IP" 6641; do i=$((i+1)); [ $i -gt 180 ] && echo "[error] NB wait timeout" >&2 && exit 1; sleep 1; done
+              i=0; until nc -z -w 1 "$SB_IP" 6642; do i=$((i+1)); [ $i -gt 180 ] && echo "[error] SB wait timeout" >&2 && exit 1; sleep 1; done
+
+              cat > /work/10-ovn.ini <<EOF
+              [ovn]
+              ovn_nb_connection = tcp:${NB_IP}:6641
+              ovn_sb_connection = tcp:${SB_IP}:6642
+              neutron_sync_mode = repair
+              EOF
+
+              echo "[info] writing/patching ConfigMap neutron-ml2-ovn-override…"
+              kubectl -n openstack create configmap neutron-ml2-ovn-override \
+                --from-file=10-ovn.ini=/work/10-ovn.ini \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+              echo "[ok] ConfigMap ready."
+          volumeMounts:
+            - name: work
+              mountPath: /work
+      volumes:
+        - name: work
+          emptyDir: {}
+---
+# Patch: project the existing Secret + our override CM into /etc/neutron/plugins/ml2
+# for neutron-server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neutron-server
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/sync-wave: "38"
+spec:
+  template:
+    spec:
+      volumes:
+        - name: ml2-projected
+          projected:
+            sources:
+              - secret:
+                  name: neutron-etc   # <-- (SECRET NAME HERE) usually neutron-etc
+              - configMap:
+                  name: neutron-ml2-ovn-override
+      containers:
+        - name: neutron-server
+          volumeMounts:
+            - name: ml2-projected
+              mountPath: /etc/neutron/plugins/ml2
+---
+# Same patch for neutron-rpc-server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neutron-rpc-server
+  namespace: openstack
+  annotations:
+    argocd.argoproj.io/sync-wave: "38"
+spec:
+  template:
+    spec:
+      volumes:
+        - name: ml2-projected
+          projected:
+            sources:
+              - secret:
+                  name: neutron-etc   # <-- (SECRET NAME HERE) usually neutron-etc
+              - configMap:
+                  name: neutron-ml2-ovn-override
+      containers:
+        - name: neutron-rpc-server
+          volumeMounts:
+            - name: ml2-projected
+              mountPath: /etc/neutron/plugins/ml2
+

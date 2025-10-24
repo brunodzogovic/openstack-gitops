@@ -25,6 +25,13 @@ manifests:
 bootstrap:
   enabled: true
 
+pod:
+  sysctls:
+    - name: net.ipv6.conf.all.disable_ipv6
+      value: "0"
+    - name: net.ipv6.conf.default.disable_ipv6
+      value: "0"
+
 conf:
   neutron:
     DEFAULT:
@@ -44,8 +51,8 @@ conf:
       ml2_type_vlan:
         network_vlan_ranges: physnet1:100:200
       ovn:
-        ovn_nb_connection: tcp:6641:0.0.0.0
-        ovn_sb_connection: tcp:6442:0.0.0.0 
+        ovn_nb_connection: tcp:ovn-ovsdb-nb:6441
+        ovn_sb_connection: tcp:ovn-ovsdb-sb:6442
         neutron_sync_mode: repair
 
 endpoints:

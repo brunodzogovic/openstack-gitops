@@ -48,7 +48,7 @@ endpoints:
       default: null
     path:
       default: /v3
-    scheme:
+    scheme: 
       default: http
     port:
       api:
@@ -105,8 +105,7 @@ endpoints:
       default: null
     path:
       default: /neutron
-    scheme:
-      default: rabbit
+    scheme: rabbit
     port:
       amqp:
         default: 5672
@@ -115,8 +114,7 @@ endpoints:
         username: rabbitmq
       neutron:
         username: neutron
-    namespace: 
-      default: osh-infra
+    namespace: osh-infra
 
   oslo_db:
     hosts:
@@ -125,8 +123,7 @@ endpoints:
       default: null
     path:
       default: /neutron
-    scheme:
-      default: mysql+pymysql
+    scheme: mysql+pymysql
     port:
       mysql:
         default: 3306
@@ -135,16 +132,14 @@ endpoints:
         username: root
       neutron:
         username: neutron
-    namespace: 
-      default: osh-infra
+    namespace: osh-infra
 
   oslo_cache:
     auth:
       memcache_secret_key: null
     hosts:
       default: memcached
-    namespace:
-      default: osh-infra
+    namespace: osh-infra
     host_fqdn_override:
       default: null
     port:
@@ -185,6 +180,31 @@ endpoints:
         default: 8775
         public: 80
 
+  network:
+    name: neutron
+    hosts:
+      default: neutron-server
+      public: neutron
+    host_fqdn_override:
+      default: null
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: null
+    scheme:
+      default: 'http'
+      service: 'http'
+    port:
+      api:
+        default: 9696
+        public: 80
+        service: 9696
+        
 dependencies:
   static:
     neutron_server:

@@ -25,71 +25,16 @@ spec:
         postRenderer:
           kustomize:
             patches:
-              # --- Turn Helm-hooked jobs into Argo hooks (and/or plain Sync resources) ---
-              - target: { kind: Job, name: neutron-db-init }
+              - target:
+                  kind: Job
+                  labelSelector: "application=neutron"
                 patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook-weight
-              - target: { kind: Job, name: neutron-db-sync }
-                patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
                   - op: remove
-                    path: /metadata/annotations/helm.sh~1hook
-                  - op: remove
-                    path: /metadata/annotations/helm.sh~1hook-weight
-              - target: { kind: Job, name: neutron-ks-user }
-                patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
-                  - op: remove
-                    path: /metadata/annotations/helm.sh~1hook
-              - target: { kind: Job, name: neutron-ks-service }
-                patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
-                  - op: remove
-                    path: /metadata/annotations/helm.sh~1hook
-              - target: { kind: Job, name: neutron-ks-endpoints }
-                patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
-                  - op: remove
-                    path: /metadata/annotations/helm.sh~1hook
-              - target: { kind: Job, name: neutron-rabbit-init }
-                patch: |
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook
-                    value: Sync
-                  - op: add
-                    path: /metadata/annotations/argocd.argoproj.io~1hook-delete-policy
-                    value: BeforeHookCreation
-                  - op: remove
-                    path: /metadata/annotations/helm.sh~1hook
+                    path: /metadata/annotations/helm.sh~1hook-delete-policy
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

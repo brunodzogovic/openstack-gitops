@@ -13,7 +13,7 @@ spec:
     path: manifests
     directory:
       recurse: false
-      include: keystone/keystone-db-reconcile.yaml
+      include: keystone-db-reconcile/keystone-db-reconcile.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}

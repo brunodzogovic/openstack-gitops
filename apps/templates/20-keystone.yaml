@@ -121,10 +121,10 @@ spec:
     - repoURL: {{ .Values.repos.self }}      # your GitOps repo
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values
-      path: manifests
+      path: manifests/keystone
       directory:
         recurse: true
-        include: keystone/**.yaml
+        include: keystone-credential-secret-rbac.yaml keystone-fernet-cleanup.yaml  keystone-fernet-secret-rbac.yaml
   syncPolicy:
     automated:
       prune: true

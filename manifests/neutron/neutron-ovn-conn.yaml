@@ -1,127 +1,96 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: neutron-ovn-conn-writer
+  name: neutron-ovn-conf-writer
   namespace: openstack
-  labels:
-    app.kubernetes.io/name: neutron-ovn-conn
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: neutron-ovn-conn-writer
+  name: neutron-ovn-conf-writer
   namespace: openstack
 rules:
   - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get","list","watch"]
-  - apiGroups: [""]
     resources: ["configmaps"]
-    verbs: ["get","create","update","patch","list"]
+    verbs: ["create","get","list","watch","update","patch"]
+  - apiGroups: [""]
+    resources: ["services","endpoints"]
+    verbs: ["get","list","watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: neutron-ovn-conn-writer
+  name: neutron-ovn-conf-writer
   namespace: openstack
 subjects:
   - kind: ServiceAccount
-    name: neutron-ovn-conn-writer
+    name: neutron-ovn-conf-writer
     namespace: openstack
 roleRef:
-  kind: Role
-  name: neutron-ovn-conn-writer
   apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: neutron-ovn-conf-writer
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: neutron-ovn-conn
+  name: neutron-ovn-confgen
   namespace: openstack
   labels:
-    app.kubernetes.io/name: neutron-ovn-conn
-  # If you use Argo sync waves, put an annotation like this on the object
-  # so it runs before neutron (e.g., wave 35 if neutron is 40).
+    app.kubernetes.io/name: neutron-ovn-confgen
   annotations:
-    argocd.argoproj.io/sync-wave: "35"
+    argocd.argoproj.io/sync-wave: "35"   # ensure it runs before neutron (your neutron is wave 40)
 spec:
-  backoffLimit: 3
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: neutron-ovn-conn
     spec:
-      serviceAccountName: neutron-ovn-conn-writer
+      serviceAccountName: neutron-ovn-conf-writer
       restartPolicy: OnFailure
       containers:
-        - name: writer
-          image: bitnami/kubectl:1.30
-          imagePullPolicy: IfNotPresent
-          command: ["/bin/bash","-c"]
-          env:
-            - name: NS
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+        - name: gen
+          image: bitnami/kubectl:1.29
+          command: ["/bin/sh","-c"]
           args:
             - |
               set -euo pipefail
 
-              echo "[INFO] Discovering OVN OVSDB services in namespace: ${NS}"
+              ns=openstack
+              nb_svc=ovn-ovsdb-nb
+              sb_svc=ovn-ovsdb-sb
 
-              # Prefer ClusterIP IPv4; fallback to first ClusterIP if multiple
-              get_ip () {
-                local svc="$1"
-                # Try spec.clusterIPs[0], fallback to spec.clusterIP
-                kubectl -n "${NS}" get svc "${svc}" -o json \
-                  | jq -r 'if .spec.clusterIPs then .spec.clusterIPs[0] else .spec.clusterIP end'
-              }
+              # Resolve IPs from Service/Endpoints (works even if DNS had oddities)
+              nb_ip="$(kubectl -n "$ns" get endpoints "$nb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}')"
+              sb_ip="$(kubectl -n "$ns" get endpoints "$sb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}')"
 
-              NB_SVC="ovn-ovsdb-nb"
-              SB_SVC="ovn-ovsdb-sb"
-              NB_IP="$(get_ip "${NB_SVC}")"
-              SB_IP="$(get_ip "${SB_SVC}")"
-
-              if [[ -z "${NB_IP}" || "${NB_IP}" == "null" ]]; then
-                echo "[ERROR] Could not resolve ClusterIP for ${NB_SVC}"; exit 1
-              fi
-              if [[ -z "${SB_IP}" || "${SB_IP}" == "null" ]]; then
-                echo "[ERROR] Could not resolve ClusterIP for ${SB_SVC}"; exit 1
+              if [ -z "${nb_ip:-}" ] || [ -z "${sb_ip:-}" ]; then
+                echo "Failed to resolve OVN NB/SB endpoints" >&2
+                exit 1
               fi
 
-              # Default OVN ports used by your setup
-              NB_PORT="${NB_PORT:-6641}"
-              SB_PORT="${SB_PORT:-6642}"
-
-              echo "[INFO] Using NB tcp://${NB_IP}:${NB_PORT}  SB tcp://${SB_IP}:${SB_PORT}"
-
-              cat > /work/99-ovn-conn.ini <<EOF
+              cat > /tmp/99-ovn-conn.ini <<'EOF'
+              [agent]
+              extensions =
+              [ml2]
+              extension_drivers = port_security
+              mechanism_drivers = ovn
+              tenant_network_types = geneve
+              type_drivers = geneve,flat,vlan
+              [ml2_type_flat]
+              flat_networks = physnet1
+              [ml2_type_geneve]
+              max_header_size = 38
+              vni_ranges = 1:10000
+              [ml2_type_vlan]
+              network_vlan_ranges = physnet1:100:200
               [ovn]
-              ovn_nb_connection = tcp:${NB_IP}:${NB_PORT}
-              ovn_sb_connection = tcp:${SB_IP}:${SB_PORT}
               neutron_sync_mode = repair
+              ovn_nb_connection = tcp:__NB_IP__:6641
+              ovn_sb_connection = tcp:__SB_IP__:6642
               EOF
 
-              # Idempotent apply of a dedicated ConfigMap (does not fight Helm’s chart-managed configmaps)
-              kubectl -n "${NS}" create configmap neutron-ovn-conn \
-                --from-file=99-ovn-conn.ini=/work/99-ovn-conn.ini \
-                --dry-run=client -o yaml \
-              | kubectl -n "${NS}" apply -f -
+              sed -i "s/__NB_IP__/${nb_ip}/" /tmp/99-ovn-conn.ini
+              sed -i "s/__SB_IP__/${sb_ip}/" /tmp/99-ovn-conn.ini
 
-              echo "[INFO] ConfigMap neutron-ovn-conn updated."
+              kubectl -n "$ns" create configmap neutron-ovn-conn \
+                --from-file=99-ovn-conn.ini=/tmp/99-ovn-conn.ini \
+                --dry-run=client -o yaml | kubectl apply -f -
 
-              # Optional: verify DB reachability now to fail fast (non-fatal if you’d rather just create the CM)
-              if command -v ovsdb-client >/dev/null 2>&1; then
-                echo "[INFO] ovsdb-client present in image; verifying NB connectivity..."
-                ovsdb-client -t 3 list-dbs "tcp:${NB_IP}:${NB_PORT}" >/dev/null && echo "[INFO] NB reachable."
-              else
-                echo "[WARN] ovsdb-client not present in this image; skipping reachability check."
-              fi
-
-              echo "[INFO] Done."
-          volumeMounts:
-            - name: work
-              mountPath: /work
-      volumes:
-        - name: work
-          emptyDir: {}

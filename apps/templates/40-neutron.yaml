@@ -44,12 +44,17 @@ spec:
                       name: neutron-ovn-conn
                       configMap:
                         name: neutron-ovn-conn
+                  - op: remove
+                    path: /spec/template/spec/containers/0/volumeMounts
+                    # custom “remove by filter”: kustomize v5+ supports this style via replacements.
+                    # If not supported in your build, use the “index” method shown below.
                   - op: add
                     path: /spec/template/spec/containers/0/volumeMounts/-
                     value:
                       name: neutron-ovn-conn
-                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.d/99-ovn-conn.ini
+                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
                       subPath: 99-ovn-conn.ini
+                      readOnly: true
               - target:
                   kind: Deployment
                   name: neutron-rpc-server
@@ -64,8 +69,9 @@ spec:
                     path: /spec/template/spec/containers/0/volumeMounts/-
                     value:
                       name: neutron-ovn-conn
-                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.d/99-ovn-conn.ini
+                      mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
                       subPath: 99-ovn-conn.ini
+                      readOnly: true 
     - repoURL: {{ .Values.repos.self }}
       targetRevision: {{ .Values.versions.self_ref | default "main" }}
       ref:  values

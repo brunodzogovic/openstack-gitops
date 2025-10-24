@@ -21,7 +21,7 @@ spec:
         valueFiles:
           - $values/values/globals.yaml
           - $values/values/neutron-ovn.yaml 
-          - $values/values/secrets/secrets.sops.yaml
+          - $values/values/secrets/neutron.secrets.sops.yaml
         postRenderer:
           kustomize:
             patches:

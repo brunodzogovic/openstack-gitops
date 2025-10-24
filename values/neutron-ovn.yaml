@@ -20,6 +20,9 @@ manifests:
   daemonset_l3_agent: false
   daemonset_metadata_agent: false
 
+bootstrap:
+  enabled: true
+
 conf:
   neutron:
     DEFAULT:

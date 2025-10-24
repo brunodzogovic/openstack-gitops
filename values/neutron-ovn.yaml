@@ -32,11 +32,11 @@ conf:
       tenant_network_types: geneve
       extension_drivers: port_security
     ml2_type_geneve:
-      vni_ranges: 1:10000
+      vni_ranges: "1:10000"
     ml2_type_flat:
       flat_networks: physnet1
     ml2_type_vlan:
-      network_vlan_ranges: physnet1:100:200
+      network_vlan_ranges: "physnet1:100:200"
 
 endpoints:
   identity:
@@ -69,6 +69,34 @@ endpoints:
         project_name: service
         user_domain_name: service
         project_domain_name: service
+      nova:
+        role: admin,service
+        region_name: RegionOne
+        project_name: service
+        username: neutron_nova
+        user_domain_name: service
+        project_domain_name: service
+      placement:
+        role: admin,service
+        region_name: RegionOne
+        project_name: service
+        username: neutron_placement
+        user_domain_name: service
+        project_domain_name: service
+      designate:
+        role: admin,service
+        region_name: RegionOne
+        project_name: service
+        username: neutron_designate
+        user_domain_name: service
+        project_domain_name: service
+      ironic:
+        role: admin,service
+        region_name: RegionOne
+        project_name: service
+        username: neutron_ironic
+        user_domain_name: service
+        project_domain_name: service
 
   oslo_messaging:
     hosts:
@@ -87,7 +115,8 @@ endpoints:
         username: rabbitmq
       neutron:
         username: neutron
-    namespace: osh-infra
+    namespace: 
+      default: osh-infra
 
   oslo_db:
     hosts:
@@ -106,7 +135,40 @@ endpoints:
         username: root
       neutron:
         username: neutron
-    namespace: osh-infra
+    namespace: 
+      default: osh-infra
+
+  oslo_cache:
+    auth:
+      memcache_secret_key: null
+    hosts:
+      default: memcached
+    namespace:
+      default: osh-infra
+    host_fqdn_override:
+      default: null
+    port:
+      memcache:
+        default: 11211
+
+  compute:
+    name: nova
+    hosts:
+      default: nova-api
+      public: nova
+    host_fqdn_override:
+      default: null
+    path:
+      default: "/v2.1/%(tenant_id)s"
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8774
+        public: 80
+      novncproxy:
+        default: 6080
+
 
 dependencies:
   static:

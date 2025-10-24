@@ -39,7 +39,7 @@ metadata:
   labels:
     app.kubernetes.io/name: neutron-ovn-confgen
   annotations:
-    argocd.argoproj.io/sync-wave: "35"   # ensure it runs before neutron (your neutron is wave 40)
+    argocd.argoproj.io/sync-wave: "35"   # neutron is wave 40
 spec:
   template:
     spec:
@@ -52,20 +52,14 @@ spec:
           args:
             - |
               set -euo pipefail
-
               ns=openstack
               nb_svc=ovn-ovsdb-nb
               sb_svc=ovn-ovsdb-sb
-
-              # Resolve IPs from Service/Endpoints (works even if DNS had oddities)
-              nb_ip="$(kubectl -n "$ns" get endpoints "$nb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}')"
-              sb_ip="$(kubectl -n "$ns" get endpoints "$sb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}')"
-
+              nb_ip="$(kubectl -n "$ns" get endpoints "$nb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}' || true)"
+              sb_ip="$(kubectl -n "$ns" get endpoints "$sb_svc" -o jsonpath='{.subsets[0].addresses[0].ip}' || true)"
               if [ -z "${nb_ip:-}" ] || [ -z "${sb_ip:-}" ]; then
-                echo "Failed to resolve OVN NB/SB endpoints" >&2
-                exit 1
+                echo "Failed to resolve OVN NB/SB endpoints" >&2; exit 1
               fi
-
               cat > /tmp/99-ovn-conn.ini <<'EOF'
               [agent]
               extensions =
@@ -86,10 +80,8 @@ spec:
               ovn_nb_connection = tcp:__NB_IP__:6641
               ovn_sb_connection = tcp:__SB_IP__:6642
               EOF
-
               sed -i "s/__NB_IP__/${nb_ip}/" /tmp/99-ovn-conn.ini
               sed -i "s/__SB_IP__/${sb_ip}/" /tmp/99-ovn-conn.ini
-
               kubectl -n "$ns" create configmap neutron-ovn-conn \
                 --from-file=99-ovn-conn.ini=/tmp/99-ovn-conn.ini \
                 --dry-run=client -o yaml | kubectl apply -f -

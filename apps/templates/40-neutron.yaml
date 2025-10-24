@@ -78,7 +78,7 @@ spec:
       path: manifests
       directory:
         recurse: true
-        include: neutron/^^.yaml
+        include: neutron/**.yaml
   syncPolicy:
     automated: { prune: true, selfHeal: true }
 

@@ -31,17 +31,18 @@ conf:
       core_plugin: ml2
       service_plugins: ovn-router
   plugins:
-    ml2:
-      mechanism_drivers: ovn
-      type_drivers: geneve,flat,vlan
-      tenant_network_types: geneve
-      extension_drivers: port_security
-    ml2_type_geneve:
-      vni_ranges: "1:10000"
-    ml2_type_flat:
-      flat_networks: physnet1
-    ml2_type_vlan:
-      network_vlan_ranges: "physnet1:100:200"
+    ml2_conf:
+      ml2:
+        mechanism_drivers: ovn
+        type_drivers: geneve,flat,vlan
+        tenant_network_types: geneve
+        extension_drivers: port_security
+      ml2_type_geneve:
+        vni_ranges: 1:10000
+      ml2_type_flat:
+        flat_networks: physnet1
+      ml2_type_vlan:
+        network_vlan_ranges: physnet1:100:200
 
 endpoints:
   identity:

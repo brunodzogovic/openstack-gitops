@@ -44,8 +44,8 @@ conf:
       ml2_type_vlan:
         network_vlan_ranges: physnet1:100:200
       ovn:
-        ovn_nb_connection: "tcp:ovn-ovsdb-nb:6641"
-        ovn_sb_connection: "tcp:ovn-ovsdb-sb:6642" 
+        ovn_nb_connection: ovn-ovsdb-nb:6641
+        ovn_sb_connection: ovn-ovsdb-sb:6642 
         neutron_sync_mode: repair
 
 endpoints:

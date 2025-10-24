@@ -103,8 +103,7 @@ endpoints:
       default: rabbitmq
     host_fqdn_override:
       default: null
-    path:
-      default: /neutron
+    path: /neutron
     scheme: rabbit
     port:
       amqp:
@@ -121,8 +120,7 @@ endpoints:
       default: mariadb
     host_fqdn_override:
       default: null
-    path:
-      default: /neutron
+    path: /neutron
     scheme: mysql+pymysql
     port:
       mysql:

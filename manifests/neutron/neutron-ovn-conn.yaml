@@ -1,9 +1,4 @@
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: openstack
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: neutron-ovn-confgen
@@ -21,9 +16,6 @@ rules:
   - apiGroups: [""]
     resources: ["services","endpoints","endpointslices","configmaps"]
     verbs: ["get","list","watch","create","update","patch","delete"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get","list","watch","update","patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -39,6 +31,7 @@ roleRef:
   name: neutron-ovn-confgen
   apiGroup: rbac.authorization.k8s.io
 ---
+# Empty CM object so workloads can mount it immediately; the Job will replace it with data
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -54,11 +47,14 @@ kind: Job
 metadata:
   name: neutron-ovn-confgen
   namespace: openstack
-  annotations:
-    argocd.argoproj.io/sync-wave: "35"
   labels:
     app.kubernetes.io/name: neutron-ovn-confgen
     application: neutron
+  annotations:
+    # Make sure this runs BEFORE the chart’s neutron-server (wave ~40) and every sync
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "35"
 spec:
   backoffLimit: 3
   template:
@@ -71,7 +67,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: confgen
-          image: lachlanevenson/k8s-kubectl:v1.30.0
+          image: bitnami/kubectl:1.30
           command: ["/bin/sh","-c"]
           args:
             - |
@@ -80,15 +76,15 @@ spec:
               nb_svc="ovn-ovsdb-nb"
               sb_svc="ovn-ovsdb-sb"
 
-              # Resolve ClusterIPs
+              # ClusterIP (SingleStack is fine)
               nb_ip="$(kubectl -n "$ns" get svc "$nb_svc" -o jsonpath='{.spec.clusterIP}')"
               sb_ip="$(kubectl -n "$ns" get svc "$sb_svc" -o jsonpath='{.spec.clusterIP}')"
 
-              # Helper to pick TLS if present, else TCP
+              # Choose TLS port if present, else TCP
               pick_port() {
-                svc="$1"; tls1="$2"; tcp1="$3"
+                svc="$1"; tls="$2"; tcp="$3"
                 ports="$(kubectl -n "$ns" get endpoints "$svc" -o jsonpath='{range .subsets[*].ports[*]}{.port}{"\n"}{end}' || true)"
-                if echo "$ports" | grep -qx "$tls1"; then echo "$tls1 ssl"; elif echo "$ports" | grep -qx "$tcp1"; then echo "$tcp1 tcp"; else echo "$tcp1 tcp"; fi
+                if echo "$ports" | grep -qx "$tls"; then echo "$tls ssl"; elif echo "$ports" | grep -qx "$tcp"; then echo "$tcp tcp"; else echo "$tcp tcp"; fi
               }
 
               read nb_port nb_proto <<EOF
@@ -108,47 +104,11 @@ spec:
               neutron_sync_mode = repair
               EOF
 
-              # Recreate CM atomically
-              kubectl -n "$ns" delete configmap neutron-ovn-conn --ignore-not-found
+              # Replace the CM atomically with file data
               kubectl -n "$ns" create configmap neutron-ovn-conn \
-                --from-file=10-ovn-connections.ini=/tmp/10-ovn-connections.ini
+                --from-file=10-ovn-connections.ini=/tmp/10-ovn-connections.ini \
+                --dry-run=client -o yaml | kubectl apply -f -
 
-              # Strategic-merge patch (YAML) – avoids JSON here-docs
-              cat > /tmp/patch.yaml <<'PYAML'
-              spec:
-                template:
-                  spec:
-                    volumes:
-                      - name: neutron-ovn-conn
-                        configMap:
-                          name: neutron-ovn-conn
-                          optional: true
-                    initContainers:
-                      - name: inject-ovn-conn
-                        image: busybox:1.36
-                        command: ["/bin/sh","-c"]
-                        args:
-                          - >-
-                            set -e;
-                            mkdir -p /etc/neutron/neutron.conf.d;
-                            if [ -f /ovn-snippet/10-ovn-connections.ini ]; then
-                              cp /ovn-snippet/10-ovn-connections.ini /etc/neutron/neutron.conf.d/;
-                            fi
-                        volumeMounts:
-                          - name: neutron-ovn-conn
-                            mountPath: /ovn-snippet
-                          - name: neutron-etc
-                            mountPath: /etc/neutron
-                    containers:
-                      - name: neutron-server
-                        volumeMounts:
-                          - name: neutron-ovn-conn
-                            mountPath: /etc/neutron/neutron.conf.d/10-ovn-connections.ini
-                            subPath: 10-ovn-connections.ini
-                            readOnly: true
-              PYAML
-
-              # Apply patch and restart rollout to pick CM immediately
-              kubectl -n "$ns" patch deploy neutron-server --type=merge --patch-file /tmp/patch.yaml || true
-              kubectl -n "$ns" rollout restart deploy neutron-server || true
+              echo "Generated:"
+              cat /tmp/10-ovn-connections.ini
 

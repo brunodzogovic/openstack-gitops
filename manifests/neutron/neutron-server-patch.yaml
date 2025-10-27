@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neutron-server
+  namespace: openstack
+spec:
+  template:
+    spec:
+      volumes:
+        - name: neutron-ovn-conn
+          configMap:
+            name: neutron-ovn-conn
+            optional: true
+      initContainers:
+        - name: inject-ovn-conn
+          image: busybox:1.36
+          command: ["/bin/sh","-c"]
+          args:
+            - >
+              set -e;
+              mkdir -p /etc/neutron/neutron.conf.d;
+              if [ -f /ovn-snippet/10-ovn-connections.ini ]; then
+                cp /ovn-snippet/10-ovn-connections.ini /etc/neutron/neutron.conf.d/;
+              fi
+          volumeMounts:
+            - name: neutron-ovn-conn
+              mountPath: /ovn-snippet
+            - name: neutron-etc
+              mountPath: /etc/neutron
+      containers:
+        - name: neutron-server
+          volumeMounts:
+            - name: neutron-ovn-conn
+              mountPath: /etc/neutron/neutron.conf.d/10-ovn-connections.ini
+              subPath: 10-ovn-connections.ini
+              readOnly: true
+

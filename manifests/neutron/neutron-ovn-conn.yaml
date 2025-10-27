@@ -106,11 +106,11 @@ spec:
 
               # Render ML2 OVN snippet (ini)
               cat > /tmp/10-ovn-connections.ini <<EOF
-[ovn]
-ovn_nb_connection = ${ovn_nb}
-ovn_sb_connection = ${ovn_sb}
-neutron_sync_mode = repair
-EOF
+              [ovn]
+              ovn_nb_connection = ${ovn_nb}
+              ovn_sb_connection = ${ovn_sb}
+              neutron_sync_mode = repair
+              EOF
 
               # Patch/create the ConfigMap
               kubectl -n "$ns" create configmap neutron-ovn-conn --from-file=10-ovn-connections.ini=/tmp/10-ovn-connections.ini --dry-run=client -o yaml \

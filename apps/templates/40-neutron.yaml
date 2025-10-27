@@ -11,6 +11,12 @@ spec:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.namespaces.os }}
   sources:
+    # Values repo (for $values indirection)
+    - repoURL: {{ .Values.repos.self }}
+      targetRevision: {{ .Values.versions.self_ref | default "main" }}
+      ref: values
+
+    # OpenStack-Helm neutron chart
     - repoURL: {{ .Values.repos.osh }}
       targetRevision: {{ .Values.versions.osh_services_ref | default "master" }}
       path: neutron
@@ -22,7 +28,7 @@ spec:
         postRenderer:
           kustomize:
             patchesJson6902:
-              # keep: unhook neutron Jobs so Argo applies them normally
+              # Strip Helm hook annotations so Argo creates the Jobs normally
               - target:
                   group: batch
                   version: v1
@@ -35,119 +41,8 @@ spec:
                     path: /metadata/annotations/helm.sh~1hook-weight
                   - op: remove
                     path: /metadata/annotations/helm.sh~1hook-delete-policy
-
-              # ---- neutron-server: add OVN conf dir + generator initContainer ----
-              - target:
-                  kind: Deployment
-                  name: neutron-server
-                patch: |
-                  - op: add
-                    path: /spec/template/spec/volumes/-
-                    value:
-                      name: ovn-conf-d
-                      emptyDir: {}
-                  - op: add
-                    path: /spec/template/spec/initContainers/-
-                    value:
-                      name: gen-ovn-connections
-                      image: quay.io/airshipit/neutron:2025.1-ubuntu_noble
-                      imagePullPolicy: IfNotPresent
-                      command: ["/bin/sh","-c"]
-                      args:
-                        - |
-                          set -e
-                          mkdir -p /conf
-                          python3 - <<'PY'
-import socket
-def first_ipv4(host):
-    # AF_INET forces IPv4; returns first A record
-    infos = socket.getaddrinfo(host, None, socket.AF_INET, socket.SOCK_STREAM)
-    return infos[0][4][0]
-def tcp_ok(ip, port, timeout=2.0):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(timeout)
-    try:
-        s.connect((ip, port)); s.close(); return True
-    except Exception:
-        s.close(); return False
-nb_ip = first_ipv4("ovn-ovsdb-nb")
-sb_ip = first_ipv4("ovn-ovsdb-sb")
-nb_port = 6643 if tcp_ok(nb_ip, 6643) else 6641
-sb_port = 6644 if tcp_ok(sb_ip, 6644) else 6642
-with open("/conf/10-ovn-connections.ini","w") as f:
-    f.write("[ovn]\n")
-    f.write(f"ovn_nb_connection = tcp:{nb_ip}:{nb_port}\n")
-    f.write(f"ovn_sb_connection = tcp:{sb_ip}:{sb_port}\n")
-    f.write("neutron_sync_mode = repair\n")
-print("Wrote /conf/10-ovn-connections.ini")
-PY
-                      volumeMounts:
-                        - name: ovn-conf-d
-                          mountPath: /conf
-                  - op: add
-                    path: /spec/template/spec/containers/0/volumeMounts/-
-                    value:
-                      name: ovn-conf-d
-                      mountPath: /etc/neutron/neutron.conf.d
-
-              # ---- neutron-rpc-server: same treatment ----
-              - target:
-                  kind: Deployment
-                  name: neutron-rpc-server
-                patch: |
-                  - op: add
-                    path: /spec/template/spec/volumes/-
-                    value:
-                      name: ovn-conf-d
-                      emptyDir: {}
-                  - op: add
-                    path: /spec/template/spec/initContainers/-
-                    value:
-                      name: gen-ovn-connections
-                      image: REPLACE_WITH_YOUR_NEUTRON_IMAGE
-                      imagePullPolicy: IfNotPresent
-                      command: ["/bin/sh","-c"]
-                      args:
-                        - |
-                          set -e
-                          mkdir -p /conf
-                          python3 - <<'PY'
-import socket
-def first_ipv4(host):
-    infos = socket.getaddrinfo(host, None, socket.AF_INET, socket.SOCK_STREAM)
-    return infos[0][4][0]
-def tcp_ok(ip, port, timeout=2.0):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.settimeout(timeout)
-    try:
-        s.connect((ip, port)); s.close(); return True
-    except Exception:
-        s.close(); return False
-nb_ip = first_ipv4("ovn-ovsdb-nb")
-sb_ip = first_ipv4("ovn-ovsdb-sb")
-nb_port = 6643 if tcp_ok(nb_ip, 6643) else 6641
-sb_port = 6644 if tcp_ok(sb_ip, 6644) else 6642
-with open("/conf/10-ovn-connections.ini","w") as f:
-    f.write("[ovn]\n")
-    f.write(f"ovn_nb_connection = tcp:{nb_ip}:{nb_port}\n")
-    f.write(f"ovn_sb_connection = tcp:{sb_ip}:{sb_port}\n")
-    f.write("neutron_sync_mode = repair\n")
-print("Wrote /conf/10-ovn-connections.ini")
-PY
-                      volumeMounts:
-                        - name: ovn-conf-d
-                          mountPath: /conf
-                  - op: add
-                    path: /spec/template/spec/containers/0/volumeMounts/-
-                    value:
-                      name: ovn-conf-d
-                      mountPath: /etc/neutron/neutron.conf.d
-
-    - repoURL: {{ .Values.repos.self }}
-      targetRevision: {{ .Values.versions.self_ref | default "main" }}
-      ref: values
-      path: manifests
-      directory:
-        recurse: true
-        include: neutron/**.yaml
   syncPolicy:
-    automated: { prune: true, selfHeal: true }
+    automated:
+      prune: true
+      selfHeal: true
 

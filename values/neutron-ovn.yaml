@@ -25,6 +25,12 @@ manifests:
 bootstrap:
   enabled: true
 
+images:
+  tags:
+    ovn_ovsdb_nb: ghcr.io/ovn-org/ovn:24.03.0   # or the 3.3.x/24.x you standardize on
+    ovn_ovsdb_sb: ghcr.io/ovn-org/ovn:24.03.0
+    ovn_northd:   ghcr.io/ovn-org/ovn:24.03.0
+
 conf:
   neutron:
     DEFAULT:
